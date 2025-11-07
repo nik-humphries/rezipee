@@ -873,63 +873,207 @@ with tabs[5]:
 with tabs[6]:
     st.header("Add or Modify Recipes")
 
-    with st.expander("➕ Add New Recipe"):
-        new_recipe_name = st.text_input("Recipe name")
+    with st.expander("➕ Add New Recipe", expanded=True):
+        st.write("Fill in the recipe details below. All fields marked with * are required.")
+        
+        # Recipe basic info
+        col_name, col_servings = st.columns([3, 1])
+        with col_name:
+            new_recipe_name = st.text_input("Recipe name *", placeholder="e.g., Spaghetti Carbonara")
+        with col_servings:
+            new_servings = st.number_input("Servings *", min_value=1, max_value=20, value=2)
+        
+        # Metadata in columns
         col1, col2 = st.columns(2)
         with col1:
-            new_cook_time = st.text_input("Cook time (optional, e.g. '30 mins')")
-            new_rating = st.selectbox("Rating (optional):", [""] + [str(i) for i in range(1, 6)])
-            new_prep_friendly = st.checkbox("Meal prep friendly?")
+            new_cook_time = st.text_input("Cook time", placeholder="e.g., 30 mins", help="Approximate cooking time")
+            new_rating = st.selectbox("Rating:", [""] + [str(i) for i in range(1, 6)], help="Rate this recipe 1-5 stars")
+            new_prep_friendly = st.checkbox("Meal prep friendly?", help="Can this be batch cooked or prepared ahead?")
         with col2:
-            new_source = st.text_input("Source (optional, e.g. 'BBC Good Food')")
-            new_source_url = st.text_input("Source URL (optional)")
+            new_source = st.text_input("Source", placeholder="e.g., BBC Good Food", help="Where did you find this recipe?")
+            new_source_url = st.text_input("Source URL", placeholder="https://...", help="Link to the original recipe")
         
-        new_tags = st.text_input("Tags (comma-separated, optional)")
-        new_ingredients = st.text_area("Ingredients (one per line, e.g. 'Chicken breast,300,g,Protein' or 'Chicken breast,300,g' if no category)")
-
-        if st.button("Add Recipe"):
-            if new_recipe_name and new_ingredients:
-                new_rows = []
-                recipe_id = str(uuid.uuid4())  # Generate ONE recipe_id for the entire recipe
-                for line in new_ingredients.strip().split("\n"):
-                    parts = [x.strip() for x in line.split(",")]
-                    try:
-                        if len(parts) == 4:
-                            ing, qty, unit, cat = parts
-                        elif len(parts) == 3:
-                            ing, qty, unit = parts
-                            cat = ""  # Category is optional
-                        else:
-                            st.error(f"Invalid line format: {line}. Expected 3 or 4 comma-separated values.")
-                            continue
-                        
-                        new_rows.append({
-                            "recipe_id": recipe_id,  # Same ID for all ingredients in this recipe
-                            "recipe_name": new_recipe_name,
-                            "ingredient": ing,
-                            "quantity": float(qty),
-                            "unit": unit,
-                            "category": cat,
-                            "tags": new_tags,
-                            "cook_time": new_cook_time,
-                            "rating": new_rating if new_rating else '',
-                            "source": new_source,
-                            "source_url": new_source_url,
-                            "servings": 2,  # Default servings
-                            "notes": "",
-                            "estimated_cost": 0.0,  # Deprecated, now using ingredient pricing
-                            "prep_friendly": new_prep_friendly
+        new_tags = st.text_input("Tags (comma-separated)", placeholder="e.g., Italian, Pasta, Quick", help="Add tags to organize recipes")
+        new_notes = st.text_area("Notes", placeholder="Any special instructions or modifications...", help="Optional notes about the recipe")
+        
+        st.divider()
+        
+        # Ingredient input options
+        st.subheader("📝 Add Ingredients")
+        
+        # Get existing ingredients and units for autocomplete
+        existing_ingredients = sorted(recipes['ingredient'].unique().tolist()) if not recipes.empty else []
+        existing_units = sorted(recipes['unit'].unique().tolist()) if not recipes.empty else ['g', 'ml', 'tsp', 'tbsp', 'cup', 'item']
+        existing_categories = sorted([cat for cat in recipes['category'].unique().tolist() if cat]) if not recipes.empty else ['Protein', 'Vegetables', 'Carbs', 'Dairy', 'Spices', 'Other']
+        
+        input_method = st.radio(
+            "Choose input method:",
+            ["📊 Table Format (Recommended)", "📝 Text Format"],
+            help="Table format is easier and validates as you type"
+        )
+        
+        if input_method == "📊 Table Format (Recommended)":
+            st.write("Add ingredients one by one:")
+            
+            # Initialize session state for ingredient list
+            if "new_recipe_ingredients" not in st.session_state:
+                st.session_state.new_recipe_ingredients = []
+            
+            # Add ingredient form
+            with st.form("add_ingredient_form", clear_on_submit=True):
+                col_ing, col_qty, col_unit, col_cat = st.columns([3, 1, 1, 2])
+                with col_ing:
+                    ing_name = st.selectbox("Ingredient", [""] + existing_ingredients, key="ing_input")
+                    if not ing_name:
+                        ing_name = st.text_input("Or type new ingredient", key="ing_text", label_visibility="collapsed")
+                with col_qty:
+                    ing_qty = st.number_input("Quantity", min_value=0.0, step=0.1, format="%.1f", key="qty_input")
+                with col_unit:
+                    ing_unit = st.selectbox("Unit", existing_units, key="unit_input")
+                with col_cat:
+                    ing_cat = st.selectbox("Category (optional)", [""] + existing_categories + ["+ Add new category"], key="cat_input")
+                    if ing_cat == "+ Add new category":
+                        ing_cat = st.text_input("New category name", key="cat_new", label_visibility="collapsed")
+                
+                if st.form_submit_button("➕ Add Ingredient"):
+                    if ing_name and ing_qty > 0:
+                        st.session_state.new_recipe_ingredients.append({
+                            "ingredient": ing_name,
+                            "quantity": ing_qty,
+                            "unit": ing_unit,
+                            "category": ing_cat if ing_cat else ""
                         })
-                    except ValueError as e:
-                        st.error(f"Error parsing line '{line}': {e}")
-                        
-                if new_rows:
-                    new_df = pd.DataFrame(new_rows)
-                    updated = pd.concat([recipes, new_df], ignore_index=True)
-                    save_data(updated)
-                    st.rerun()
+                        st.success(f"Added {ing_name}")
+                        st.rerun()
+                    else:
+                        st.error("Please enter ingredient name and quantity")
+            
+            # Show current ingredients
+            if st.session_state.new_recipe_ingredients:
+                st.write(f"**Current ingredients ({len(st.session_state.new_recipe_ingredients)}):**")
+                for idx, ing in enumerate(st.session_state.new_recipe_ingredients):
+                    col1, col2 = st.columns([5, 1])
+                    with col1:
+                        st.write(f"• {ing['ingredient']}: {ing['quantity']} {ing['unit']}" + 
+                                (f" ({ing['category']})" if ing['category'] else ""))
+                    with col2:
+                        if st.button("🗑️", key=f"del_ing_{idx}"):
+                            st.session_state.new_recipe_ingredients.pop(idx)
+                            st.rerun()
             else:
-                st.warning("Please fill in the recipe name and ingredients.")
+                st.info("👆 Add ingredients using the form above")
+        
+        else:  # Text format
+            st.write("Enter one ingredient per line in this format:")
+            st.code("ingredient_name, quantity, unit, category (optional)")
+            st.caption("Examples:")
+            st.caption("• Chicken breast, 300, g, Protein")
+            st.caption("• Olive oil, 2, tbsp")
+            st.caption("• Onion, 1, item, Vegetables")
+            
+            new_ingredients = st.text_area(
+                "Ingredients *",
+                placeholder="Chicken breast, 300, g, Protein\nOnion, 1, item, Vegetables",
+                height=150,
+                help="One ingredient per line: name, quantity, unit, category"
+            )
+        
+        st.divider()
+        
+        # Save button
+        col_save, col_clear = st.columns([1, 1])
+        with col_save:
+            if st.button("💾 Save Recipe", type="primary", use_container_width=True):
+                # Validate
+                if not new_recipe_name:
+                    st.error("❌ Please enter a recipe name")
+                elif input_method == "📊 Table Format (Recommended)" and not st.session_state.new_recipe_ingredients:
+                    st.error("❌ Please add at least one ingredient")
+                elif input_method == "📝 Text Format" and not new_ingredients:
+                    st.error("❌ Please enter ingredients")
+                else:
+                    # Process ingredients based on input method
+                    new_rows = []
+                    recipe_id = str(uuid.uuid4())
+                    errors = []
+                    
+                    if input_method == "📊 Table Format (Recommended)":
+                        for ing_data in st.session_state.new_recipe_ingredients:
+                            new_rows.append({
+                                "recipe_id": recipe_id,
+                                "recipe_name": new_recipe_name,
+                                "ingredient": ing_data['ingredient'],
+                                "quantity": float(ing_data['quantity']),
+                                "unit": ing_data['unit'],
+                                "category": ing_data['category'],
+                                "tags": new_tags,
+                                "cook_time": new_cook_time,
+                                "rating": new_rating if new_rating else '',
+                                "source": new_source,
+                                "source_url": new_source_url,
+                                "servings": new_servings,
+                                "notes": new_notes,
+                                "estimated_cost": 0.0,
+                                "prep_friendly": new_prep_friendly
+                            })
+                    else:  # Text format
+                        for line in new_ingredients.strip().split("\n"):
+                            if not line.strip():
+                                continue
+                            parts = [x.strip() for x in line.split(",")]
+                            try:
+                                if len(parts) == 4:
+                                    ing, qty, unit, cat = parts
+                                elif len(parts) == 3:
+                                    ing, qty, unit = parts
+                                    cat = ""
+                                else:
+                                    errors.append(f"❌ Invalid format: {line}")
+                                    continue
+                                
+                                new_rows.append({
+                                    "recipe_id": recipe_id,
+                                    "recipe_name": new_recipe_name,
+                                    "ingredient": ing,
+                                    "quantity": float(qty),
+                                    "unit": unit,
+                                    "category": cat,
+                                    "tags": new_tags,
+                                    "cook_time": new_cook_time,
+                                    "rating": new_rating if new_rating else '',
+                                    "source": new_source,
+                                    "source_url": new_source_url,
+                                    "servings": new_servings,
+                                    "notes": new_notes,
+                                    "estimated_cost": 0.0,
+                                    "prep_friendly": new_prep_friendly
+                                })
+                            except ValueError as e:
+                                errors.append(f"❌ Error parsing '{line}': {e}")
+                    
+                    # Show errors if any
+                    if errors:
+                        for error in errors:
+                            st.error(error)
+                    
+                    # Save if we have valid rows
+                    if new_rows:
+                        new_df = pd.DataFrame(new_rows)
+                        updated = pd.concat([recipes, new_df], ignore_index=True)
+                        save_data(updated)
+                        # Clear the ingredient list for table format
+                        if "new_recipe_ingredients" in st.session_state:
+                            st.session_state.new_recipe_ingredients = []
+                        st.success(f"✅ Recipe '{new_recipe_name}' added successfully with {len(new_rows)} ingredients!")
+                        st.rerun()
+                    elif not errors:
+                        st.error("❌ No valid ingredients to save")
+        
+        with col_clear:
+            if st.button("🗑️ Clear Form", use_container_width=True):
+                if "new_recipe_ingredients" in st.session_state:
+                    st.session_state.new_recipe_ingredients = []
+                st.rerun()
     
     # Recipe-level editor for metadata
     st.subheader("✏️ Edit Recipe Metadata")
@@ -1000,9 +1144,33 @@ with tabs[6]:
 
     st.subheader("🧩 Edit Individual Ingredients")
     st.write("Use the editor below to modify individual ingredient quantities, units, and categories:")
-    editable = st.data_editor(recipes, num_rows="dynamic", use_container_width=True)
+    
+    # Filter by recipe
+    recipe_filter = st.selectbox(
+        "🔍 Filter by recipe (optional):",
+        options=["All recipes"] + sorted(recipes['recipe_name'].dropna().unique().tolist()),
+        key="recipe_filter_ingredients"
+    )
+    
+    # Apply filter if selected
+    if recipe_filter == "All recipes":
+        editable = st.data_editor(recipes, num_rows="dynamic", use_container_width=True)
+        st.caption(f"Showing all {len(recipes)} ingredients from all recipes")
+    else:
+        filtered_recipes = recipes[recipes['recipe_name'] == recipe_filter]
+        editable = st.data_editor(filtered_recipes, num_rows="dynamic", use_container_width=True)
+        st.caption(f"Showing {len(filtered_recipes)} ingredients for **{recipe_filter}**")
+    
     if st.button("💾 Save Ingredient Changes"):
-        save_data(editable)
+        # If filtered, merge changes back into the full dataset
+        if recipe_filter != "All recipes":
+            # Update only the edited rows in the main recipes dataframe
+            recipes_updated = recipes.copy()
+            for idx in editable.index:
+                recipes_updated.loc[idx] = editable.loc[idx]
+            save_data(recipes_updated)
+        else:
+            save_data(editable)
         st.rerun()
 
 # ============================================================
