@@ -6,6 +6,7 @@ import os
 DATA_FILE = "recipes.csv"
 HISTORY_FILE = "meal_history.csv"
 PANTRY_FILE = "pantry_staples.csv"
+PRICING_FILE = "ingredient_pricing.csv"
 
 # --- Load and save ---
 @st.cache_data
@@ -59,6 +60,16 @@ def load_pantry():
 def save_pantry(df):
     df.to_csv(PANTRY_FILE, index=False)
     st.success("✅ Pantry staples saved!")
+
+def load_pricing():
+    if os.path.exists(PRICING_FILE):
+        return pd.read_csv(PRICING_FILE)
+    else:
+        return pd.DataFrame(columns=["ingredient", "unit", "price_per_unit"])
+
+def save_pricing(df):
+    df.to_csv(PRICING_FILE, index=False)
+    st.success("✅ Ingredient pricing saved!")
 
 def get_recipe_recommendations(recipes_df, history_df, top_n=5):
     """Generate smart recipe recommendations"""
@@ -121,6 +132,7 @@ def get_recipe_recommendations(recipes_df, history_df, top_n=5):
 recipes = load_data()
 meal_history = load_history()
 pantry_staples = load_pantry()
+ingredient_pricing = load_pricing()
 
 # Initialize session state for weekly planner
 if "weekly_recipes" not in st.session_state:
@@ -132,7 +144,7 @@ st.set_page_config(page_title="Gousto Recipe Manager", layout="wide")
 st.title("🥘 Gousto Recipe Manager")
 
 # --- Tabs for better navigation ---
-tabs = st.tabs(["🏠 Dashboard", "🔎 Browse Recipes", "🧾 Weekly Planner", "📅 Calendar View", "🥫 Pantry", "✏️ Edit Recipes", "📚 Meal History"])
+tabs = st.tabs(["🏠 Dashboard", "🔎 Browse Recipes", "🧾 Weekly Planner", "📅 Calendar View", "🥫 Pantry", "💰 Ingredient Pricing", "✏️ Edit Recipes", "📚 Meal History"])
 
 # ============================================================
 # 🏠 TAB 0: Dashboard
@@ -247,77 +259,105 @@ with tabs[1]:
             current_rating = recipe_data.get('rating', '')
             current_rating = '' if pd.isna(current_rating) else str(current_rating)
             
-            # Build expander title with rating
+            # Calculate recipe cost for title
+            recipe_ingredients = filtered[filtered["recipe_name"] == recipe]
+            recipe_cost = 0
+            for _, ing in recipe_ingredients.iterrows():
+                price_match = ingredient_pricing[
+                    (ingredient_pricing['ingredient'].str.lower() == ing['ingredient'].lower()) & 
+                    (ingredient_pricing['unit'].str.lower() == ing['unit'].lower())
+                ]
+                if not price_match.empty:
+                    recipe_cost += ing['quantity'] * price_match.iloc[0]['price_per_unit']
+            
+            # Build expander title with rating and cost
             title = recipe
             if current_rating and current_rating.strip():
                 title += f" ⭐ {current_rating}"
+            if recipe_cost > 0:
+                title += f" 💰 £{recipe_cost:.2f}"
             
-            # Quick add button before expander
-            col_title, col_quick_add = st.columns([5, 1])
-            with col_title:
-                expander_label = title
-            with col_quick_add:
-                if st.button("➕ Add", key=f"quick_add_{recipe}"):
-                    if recipe not in st.session_state.weekly_recipes:
-                        st.session_state.weekly_recipes.append(recipe)
-                        st.success(f"✅ Added!")
-                        st.rerun()
-                    else:
-                        st.info(f"Already added!")
+            # Create columns for expander and button on same row
+            col_expander, col_button = st.columns([6, 1])
             
-            with st.expander(title):
-                # Show recipe metadata
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    if recipe_data.get('cook_time'):
-                        st.write(f"⏱️ **Cook time:** {recipe_data['cook_time']}")
-                    # Show prep-friendly indicator
-                    if recipe_data.get('prep_friendly'):
-                        st.write("🍱 **Meal prep friendly**")
-                with col2:
-                    if recipe_data.get('source'):
-                        st.write(f"📖 **Source:** {recipe_data['source']}")
-                with col3:
-                    if recipe_data.get('source_url'):
-                        st.markdown(f"🔗 [Recipe Link]({recipe_data['source_url']})")
-                    if recipe_data.get('estimated_cost') and float(recipe_data.get('estimated_cost', 0)) > 0:
-                        st.write(f"💰 **Cost:** £{float(recipe_data['estimated_cost']):.2f}")
-                
-                # Show ingredients
-                st.dataframe(
-                    filtered[filtered["recipe_name"] == recipe][["ingredient", "quantity", "unit", "category"]],
-                    hide_index=True,
-                )
-                
-                # Rating interface
-                col_rate, col_add = st.columns(2)
-                with col_rate:
-                    # Fix rating index calculation
-                    rating_value = recipe_data.get('rating', '')
-                    if pd.isna(rating_value) or rating_value == '' or str(rating_value).strip() == '':
-                        rating_index = 0
-                    else:
-                        try:
-                            rating_index = int(float(rating_value))
-                        except (ValueError, TypeError):
-                            rating_index = 0
+            with col_expander:
+                with st.expander(title):
+                    # Show recipe metadata
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        if recipe_data.get('cook_time'):
+                            st.write(f"⏱️ **Cook time:** {recipe_data['cook_time']}")
+                        # Show prep-friendly indicator
+                        if recipe_data.get('prep_friendly'):
+                            st.write("🍱 **Meal prep friendly**")
+                    with col2:
+                        if recipe_data.get('source'):
+                            st.write(f"📖 **Source:** {recipe_data['source']}")
+                    with col3:
+                        if recipe_data.get('source_url'):
+                            st.markdown(f"🔗 [Recipe Link]({recipe_data['source_url']})")
+                        
+                        # Calculate and show estimated cost based on ingredients
+                        recipe_ingredients = filtered[filtered["recipe_name"] == recipe]
+                        recipe_cost = 0
+                        for _, ing in recipe_ingredients.iterrows():
+                            price_match = ingredient_pricing[
+                                (ingredient_pricing['ingredient'].str.lower() == ing['ingredient'].lower()) & 
+                                (ingredient_pricing['unit'].str.lower() == ing['unit'].lower())
+                            ]
+                            if not price_match.empty:
+                                recipe_cost += ing['quantity'] * price_match.iloc[0]['price_per_unit']
+                        
+                        if recipe_cost > 0:
+                            st.write(f"💰 **Est. Cost:** £{recipe_cost:.2f}")
                     
-                    new_rating = st.selectbox(
-                        "Rate this recipe:",
-                        ["", "1", "2", "3", "4", "5"],
-                        index=rating_index,
-                        key=f"rate_{recipe}"
+                    # Show ingredients
+                    st.dataframe(
+                        filtered[filtered["recipe_name"] == recipe][["ingredient", "quantity", "unit", "category"]],
+                        hide_index=True,
                     )
-                    if st.button("Save Rating", key=f"save_rating_{recipe}"):
-                        # Update rating for all ingredients in this recipe
-                        recipes.loc[recipes["recipe_name"] == recipe, "rating"] = new_rating if new_rating else ''
-                        save_data(recipes)
-                        st.rerun()
+                    
+                    # Rating interface
+                    col_rate, col_add = st.columns(2)
+                    with col_rate:
+                        # Fix rating index calculation
+                        rating_value = recipe_data.get('rating', '')
+                        if pd.isna(rating_value) or rating_value == '' or str(rating_value).strip() == '':
+                            rating_index = 0
+                        else:
+                            try:
+                                rating_index = int(float(rating_value))
+                            except (ValueError, TypeError):
+                                rating_index = 0
+                        
+                        new_rating = st.selectbox(
+                            "Rate this recipe:",
+                            ["", "1", "2", "3", "4", "5"],
+                            index=rating_index,
+                            key=f"rate_{recipe}"
+                        )
+                        if st.button("Save Rating", key=f"save_rating_{recipe}"):
+                            # Update rating for all ingredients in this recipe
+                            recipes.loc[recipes["recipe_name"] == recipe, "rating"] = new_rating if new_rating else ''
+                            save_data(recipes)
+                            st.rerun()
+                    
+                    # Show if already in weekly planner
+                    with col_add:
+                        if recipe in st.session_state.weekly_recipes:
+                            st.success("✅ In weekly plan")
+            
+            with col_button:
+                # Toggle button for add/remove
+                is_added = recipe in st.session_state.weekly_recipes
+                button_label = "✅" if is_added else "➕"
                 
-                # Show if already in weekly planner
-                with col_add:
-                    if recipe in st.session_state.weekly_recipes:
-                        st.success("✅ In weekly plan")
+                if st.button(button_label, key=f"quick_add_{recipe}", help="Add/remove from weekly planner"):
+                    if is_added:
+                        st.session_state.weekly_recipes.remove(recipe)
+                    else:
+                        st.session_state.weekly_recipes.append(recipe)
+                    st.rerun()
 
 # ============================================================
 # 🧾 TAB 2: Weekly Planner
@@ -394,23 +434,95 @@ with tabs[2]:
             if excluded_count > 0:
                 st.info(f"ℹ️ Excluded {excluded_count} pantry staples from shopping list")
         
+        # Add pricing to shopping list
+        shopping_list['price_per_unit'] = shopping_list.apply(
+            lambda row: ingredient_pricing[
+                (ingredient_pricing['ingredient'].str.lower() == row['ingredient'].lower()) & 
+                (ingredient_pricing['unit'].str.lower() == row['unit'].lower())
+            ]['price_per_unit'].iloc[0] if not ingredient_pricing[
+                (ingredient_pricing['ingredient'].str.lower() == row['ingredient'].lower()) & 
+                (ingredient_pricing['unit'].str.lower() == row['unit'].lower())
+            ].empty else 0,
+            axis=1
+        )
+        shopping_list['item_cost'] = shopping_list['quantity'] * shopping_list['price_per_unit']
+        
         # Reorder columns for better display
-        shopping_list = shopping_list[["category", "ingredient", "quantity", "unit", "used_in_recipes"]]
+        shopping_list = shopping_list[["category", "ingredient", "quantity", "unit", "price_per_unit", "item_cost", "used_in_recipes"]]
 
         st.subheader("🛒 Combined Shopping List")
         
-        # Calculate estimated cost
-        total_cost = 0
+        # Calculate estimated cost based on ingredient pricing
+        shopping_list_cost = shopping_list['item_cost'].sum()
+        items_without_price = shopping_list[shopping_list['price_per_unit'] == 0]
+        
+        # Calculate meal cost from selected_data (includes all ingredients even if in pantry)
+        meal_cost = 0
+        recipe_costs = {}
         for recipe in selected_recipes:
-            recipe_cost = recipes[recipes["recipe_name"] == recipe].iloc[0].get('estimated_cost', 0)
-            if pd.notna(recipe_cost) and recipe_cost:
-                servings_multiplier = st.session_state.recipe_servings.get(recipe, 2) / recipes[recipes["recipe_name"] == recipe].iloc[0].get('servings', 2)
-                total_cost += float(recipe_cost) * servings_multiplier
+            recipe_data = selected_data[selected_data["recipe_name"] == recipe]
+            recipe_cost_val = 0
+            for _, item in recipe_data.iterrows():
+                price_match = ingredient_pricing[
+                    (ingredient_pricing['ingredient'].str.lower() == item['ingredient'].lower()) & 
+                    (ingredient_pricing['unit'].str.lower() == item['unit'].lower())
+                ]
+                
+                if not price_match.empty:
+                    price_per_unit = price_match.iloc[0]['price_per_unit']
+                    item_cost = item['quantity'] * price_per_unit
+                    recipe_cost_val += item_cost
+                    meal_cost += item_cost
+            recipe_costs[recipe] = recipe_cost_val
         
-        if total_cost > 0:
-            st.metric("💰 Estimated Weekly Cost", f"£{total_cost:.2f}")
+        # Display cost summary statistics
+        st.subheader("💰 Cost Summary")
         
-        st.dataframe(shopping_list, hide_index=True)
+        col_cost1, col_cost2, col_cost3 = st.columns(3)
+        with col_cost1:
+            if meal_cost > 0:
+                st.metric("🍽️ Total Meal Cost", f"£{meal_cost:.2f}", help="Cost of all ingredients including pantry staples")
+        with col_cost2:
+            if shopping_list_cost > 0:
+                st.metric("🛒 Shopping List Cost", f"£{shopping_list_cost:.2f}", help="Cost of items to buy (excludes pantry staples)")
+        with col_cost3:
+            if meal_cost > 0:
+                cost_per_serving = meal_cost / sum(st.session_state.recipe_servings.get(r, 2) for r in selected_recipes)
+                st.metric("👤 Cost Per Serving", f"£{cost_per_serving:.2f}", help="Average cost per person")
+        
+        # Show per-recipe costs
+        if recipe_costs and any(v > 0 for v in recipe_costs.values()):
+            with st.expander("📊 Cost Per Recipe", expanded=False):
+                for recipe in selected_recipes:
+                    cost = recipe_costs.get(recipe, 0)
+                    servings = st.session_state.recipe_servings.get(recipe, 2)
+                    cost_per_serving_recipe = cost / servings if servings > 0 else 0
+                    
+                    col_r1, col_r2, col_r3 = st.columns([3, 1, 1])
+                    with col_r1:
+                        st.write(f"**{recipe}**")
+                    with col_r2:
+                        st.write(f"£{cost:.2f}")
+                    with col_r3:
+                        st.caption(f"£{cost_per_serving_recipe:.2f}/serving")
+        
+        if not items_without_price.empty:
+            missing_list = [f"{row['ingredient']} ({row['unit']})" for _, row in items_without_price.iterrows()]
+            st.warning(f"⚠️ {len(missing_list)} items missing pricing: {', '.join(missing_list[:5])}{'...' if len(missing_list) > 5 else ''}")
+            st.info("💡 Add pricing in the 'Ingredient Pricing' tab for accurate cost estimates")
+        
+        st.divider()
+        
+        # Format shopping list for display
+        shopping_list_display = shopping_list.copy()
+        shopping_list_display['price_per_unit'] = shopping_list_display['price_per_unit'].apply(lambda x: f"£{x:.2f}" if x > 0 else "-")
+        shopping_list_display['item_cost'] = shopping_list_display['item_cost'].apply(lambda x: f"£{x:.2f}" if x > 0 else "-")
+        shopping_list_display = shopping_list_display.rename(columns={
+            "price_per_unit": "Price/Unit",
+            "item_cost": "Total Cost"
+        })
+        
+        st.dataframe(shopping_list_display, hide_index=True, use_container_width=True)
 
         col1, col2 = st.columns(2)
         
@@ -615,23 +727,162 @@ with tabs[4]:
         st.info("No pantry staples yet. Add ingredients you always have at home!")
 
 # ============================================================
-# ✏️ TAB 5: Add / Edit Recipes
+# 💰 TAB 5: Ingredient Pricing
 # ============================================================
 with tabs[5]:
+    st.header("💰 Ingredient Pricing Manager")
+    
+    st.write("Set the price per unit for ingredients to get accurate cost estimates for meals and shopping lists.")
+    
+    # Get all unique ingredients from recipes
+    all_ingredients = recipes[['ingredient', 'unit']].drop_duplicates()
+    
+    # Add new ingredient price
+    with st.expander("➕ Add/Update Ingredient Price"):
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            ingredient_name = st.text_input("Ingredient name:")
+        with col2:
+            ingredient_unit = st.text_input("Unit (e.g., g, ml, item):")
+        with col3:
+            price_per_unit = st.number_input("Price per unit (£):", min_value=0.0, step=0.01, format="%.2f")
+        
+        if st.button("💾 Save Price"):
+            if ingredient_name and ingredient_unit:
+                # Check if already exists
+                existing = ingredient_pricing[
+                    (ingredient_pricing['ingredient'].str.lower() == ingredient_name.lower()) & 
+                    (ingredient_pricing['unit'].str.lower() == ingredient_unit.lower())
+                ]
+                
+                if not existing.empty:
+                    # Update existing
+                    ingredient_pricing.loc[
+                        (ingredient_pricing['ingredient'].str.lower() == ingredient_name.lower()) & 
+                        (ingredient_pricing['unit'].str.lower() == ingredient_unit.lower()),
+                        'price_per_unit'
+                    ] = price_per_unit
+                else:
+                    # Add new
+                    new_price = pd.DataFrame({
+                        "ingredient": [ingredient_name],
+                        "unit": [ingredient_unit],
+                        "price_per_unit": [price_per_unit]
+                    })
+                    ingredient_pricing = pd.concat([ingredient_pricing, new_price], ignore_index=True)
+                
+                save_pricing(ingredient_pricing)
+                st.rerun()
+            else:
+                st.warning("Please fill in ingredient name and unit.")
+    
+    st.divider()
+    
+    # Show ingredients without pricing
+    st.subheader("⚠️ Ingredients Missing Prices")
+    
+    # Merge to find ingredients without prices
+    ingredients_with_status = all_ingredients.copy()
+    ingredients_with_status['has_price'] = ingredients_with_status.apply(
+        lambda row: not ingredient_pricing[
+            (ingredient_pricing['ingredient'].str.lower() == row['ingredient'].lower()) & 
+            (ingredient_pricing['unit'].str.lower() == row['unit'].lower())
+        ].empty,
+        axis=1
+    )
+    
+    missing_prices = ingredients_with_status[~ingredients_with_status['has_price']]
+    
+    if not missing_prices.empty:
+        st.write(f"Found **{len(missing_prices)}** ingredients used in recipes without pricing:")
+        
+        # Show in editable format
+        for idx, row in missing_prices.iterrows():
+            col1, col2, col3, col4 = st.columns([3, 2, 2, 1])
+            with col1:
+                st.write(f"**{row['ingredient']}**")
+            with col2:
+                st.write(f"Unit: {row['unit']}")
+            with col3:
+                price = st.number_input(
+                    "Price (£):",
+                    min_value=0.0,
+                    step=0.01,
+                    format="%.2f",
+                    key=f"price_missing_{idx}",
+                    label_visibility="collapsed"
+                )
+            with col4:
+                if st.button("💾", key=f"save_missing_{idx}"):
+                    new_price = pd.DataFrame({
+                        "ingredient": [row['ingredient']],
+                        "unit": [row['unit']],
+                        "price_per_unit": [price]
+                    })
+                    updated_pricing = pd.concat([ingredient_pricing, new_price], ignore_index=True)
+                    save_pricing(updated_pricing)
+                    st.rerun()
+    else:
+        st.success("✅ All ingredients used in recipes have pricing!")
+    
+    st.divider()
+    
+    # Show all ingredient prices
+    st.subheader("📋 All Ingredient Prices")
+    
+    if not ingredient_pricing.empty:
+        # Display as editable table
+        st.write("Click on cells to edit prices directly:")
+        
+        edited_pricing = st.data_editor(
+            ingredient_pricing.sort_values('ingredient'),
+            hide_index=True,
+            use_container_width=True,
+            column_config={
+                "ingredient": st.column_config.TextColumn("Ingredient", width="medium"),
+                "unit": st.column_config.TextColumn("Unit", width="small"),
+                "price_per_unit": st.column_config.NumberColumn(
+                    "Price per Unit (£)",
+                    format="£%.2f",
+                    width="small"
+                )
+            }
+        )
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("💾 Save All Changes"):
+                save_pricing(edited_pricing)
+                st.rerun()
+        
+        with col2:
+            # Export pricing
+            pricing_csv = ingredient_pricing.to_csv(index=False).encode("utf-8")
+            st.download_button(
+                label="📥 Download Pricing List (CSV)",
+                data=pricing_csv,
+                file_name="ingredient_pricing.csv",
+                mime="text/csv"
+            )
+    else:
+        st.info("No ingredient prices set yet. Add prices above to get started!")
+
+# ============================================================
+# ✏️ TAB 6: Add / Edit Recipes
+# ============================================================
+with tabs[6]:
     st.header("Add or Modify Recipes")
 
     with st.expander("➕ Add New Recipe"):
         new_recipe_name = st.text_input("Recipe name")
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
         with col1:
             new_cook_time = st.text_input("Cook time (optional, e.g. '30 mins')")
             new_rating = st.selectbox("Rating (optional):", [""] + [str(i) for i in range(1, 6)])
+            new_prep_friendly = st.checkbox("Meal prep friendly?")
         with col2:
             new_source = st.text_input("Source (optional, e.g. 'BBC Good Food')")
             new_source_url = st.text_input("Source URL (optional)")
-        with col3:
-            new_cost = st.number_input("Estimated cost (£, optional):", min_value=0.0, step=0.50, value=0.0)
-            new_prep_friendly = st.checkbox("Meal prep friendly?")
         
         new_tags = st.text_input("Tags (comma-separated, optional)")
         new_ingredients = st.text_area("Ingredients (one per line, e.g. 'Chicken breast,300,g,Protein' or 'Chicken breast,300,g' if no category)")
@@ -666,7 +917,7 @@ with tabs[5]:
                             "source_url": new_source_url,
                             "servings": 2,  # Default servings
                             "notes": "",
-                            "estimated_cost": new_cost,
+                            "estimated_cost": 0.0,  # Deprecated, now using ingredient pricing
                             "prep_friendly": new_prep_friendly
                         })
                     except ValueError as e:
@@ -755,9 +1006,9 @@ with tabs[5]:
         st.rerun()
 
 # ============================================================
-# 📚 TAB 6: Meal History
+# 📚 TAB 7: Meal History
 # ============================================================
-with tabs[6]:
+with tabs[7]:
     st.header("📚 Meal History")
     
     if not meal_history.empty:
