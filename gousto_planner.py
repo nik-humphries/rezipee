@@ -262,6 +262,7 @@ with tabs[1]:
             # Calculate recipe cost for title
             recipe_ingredients = filtered[filtered["recipe_name"] == recipe]
             recipe_cost = 0
+            missing_prices_count = 0
             for _, ing in recipe_ingredients.iterrows():
                 price_match = ingredient_pricing[
                     (ingredient_pricing['ingredient'].str.lower() == ing['ingredient'].lower()) & 
@@ -269,6 +270,8 @@ with tabs[1]:
                 ]
                 if not price_match.empty:
                     recipe_cost += ing['quantity'] * price_match.iloc[0]['price_per_unit']
+                else:
+                    missing_prices_count += 1
             
             # Build expander title with rating and cost
             title = recipe
@@ -276,6 +279,8 @@ with tabs[1]:
                 title += f" ⭐ {current_rating}"
             if recipe_cost > 0:
                 title += f" 💰 £{recipe_cost:.2f}"
+            if missing_prices_count > 0:
+                title += f" ⚠️"  # Warning indicator for missing prices
             
             # Create columns for expander and button on same row
             col_expander, col_button = st.columns([6, 1])
@@ -316,6 +321,20 @@ with tabs[1]:
                         filtered[filtered["recipe_name"] == recipe][["ingredient", "quantity", "unit", "category"]],
                         hide_index=True,
                     )
+                    
+                    # Show warning if some ingredients are missing prices
+                    if missing_prices_count > 0:
+                        missing_items = []
+                        for _, ing in recipe_ingredients.iterrows():
+                            price_match = ingredient_pricing[
+                                (ingredient_pricing['ingredient'].str.lower() == ing['ingredient'].lower()) & 
+                                (ingredient_pricing['unit'].str.lower() == ing['unit'].lower())
+                            ]
+                            if price_match.empty:
+                                missing_items.append(f"{ing['ingredient']} ({ing['unit']})")
+                        
+                        st.warning(f"⚠️ {missing_prices_count} ingredient(s) missing prices: {', '.join(missing_items)}")
+                        st.caption("💡 Add pricing in the 'Ingredient Pricing' tab for accurate cost estimates")
                     
                     # Rating interface
                     col_rate, col_add = st.columns(2)
