@@ -2,11 +2,13 @@ import streamlit as st
 import pandas as pd
 import uuid
 import os
+from datetime import datetime
 
 DATA_FILE = "recipes.csv"
 HISTORY_FILE = "meal_history.csv"
 PANTRY_FILE = "pantry_staples.csv"
 PRICING_FILE = "ingredient_pricing.csv"
+PRICE_HISTORY_FILE = "price_history.csv"
 
 # --- Load and save ---
 @st.cache_data
@@ -63,12 +65,71 @@ def save_pantry(df):
 
 def load_pricing():
     if os.path.exists(PRICING_FILE):
-        return pd.read_csv(PRICING_FILE)
+        df = pd.read_csv(PRICING_FILE)
+        # Add last_updated column if it doesn't exist
+        if 'last_updated' not in df.columns:
+            df['last_updated'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        return df
     else:
-        return pd.DataFrame(columns=["ingredient", "unit", "price_per_unit"])
+        return pd.DataFrame(columns=["ingredient", "unit", "price_per_unit", "last_updated"])
+
+def load_price_history():
+    if os.path.exists(PRICE_HISTORY_FILE):
+        return pd.read_csv(PRICE_HISTORY_FILE)
+    else:
+        return pd.DataFrame(columns=["ingredient", "unit", "old_price", "new_price", "changed_at"])
 
 def save_pricing(df):
+    # Load existing pricing to compare changes
+    existing_pricing = pd.DataFrame()
+    if os.path.exists(PRICING_FILE):
+        existing_pricing = pd.read_csv(PRICING_FILE)
+    
+    # Track changes in price history
+    price_history = load_price_history()
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    for _, row in df.iterrows():
+        ingredient = row['ingredient']
+        unit = row['unit']
+        new_price = row['price_per_unit']
+        
+        # Find if this ingredient existed before
+        if not existing_pricing.empty:
+            existing = existing_pricing[
+                (existing_pricing['ingredient'].str.lower() == ingredient.lower()) & 
+                (existing_pricing['unit'].str.lower() == unit.lower())
+            ]
+            
+            if not existing.empty:
+                old_price = existing.iloc[0]['price_per_unit']
+                # Only record if price actually changed
+                if abs(float(old_price) - float(new_price)) > 0.001:
+                    new_history = pd.DataFrame({
+                        "ingredient": [ingredient],
+                        "unit": [unit],
+                        "old_price": [old_price],
+                        "new_price": [new_price],
+                        "changed_at": [timestamp]
+                    })
+                    price_history = pd.concat([price_history, new_history], ignore_index=True)
+            else:
+                # New ingredient - record with old_price as 0
+                new_history = pd.DataFrame({
+                    "ingredient": [ingredient],
+                    "unit": [unit],
+                    "old_price": [0.0],
+                    "new_price": [new_price],
+                    "changed_at": [timestamp]
+                })
+                price_history = pd.concat([price_history, new_history], ignore_index=True)
+    
+    # Update last_updated timestamp for all rows
+    df['last_updated'] = timestamp
+    
+    # Save both files
     df.to_csv(PRICING_FILE, index=False)
+    price_history.to_csv(PRICE_HISTORY_FILE, index=False)
     st.success("✅ Ingredient pricing saved!")
 
 def get_recipe_recommendations(recipes_df, history_df, top_n=5):
@@ -853,8 +914,13 @@ with tabs[5]:
         # Display as editable table
         st.write("Click on cells to edit prices directly:")
         
+        # Prepare display with formatted last_updated
+        display_pricing = ingredient_pricing.copy()
+        if 'last_updated' in display_pricing.columns:
+            display_pricing['last_updated'] = pd.to_datetime(display_pricing['last_updated']).dt.strftime('%Y-%m-%d %H:%M')
+        
         edited_pricing = st.data_editor(
-            ingredient_pricing.sort_values('ingredient'),
+            display_pricing.sort_values('ingredient'),
             hide_index=True,
             use_container_width=True,
             column_config={
@@ -864,8 +930,10 @@ with tabs[5]:
                     "Price per Unit (£)",
                     format="£%.2f",
                     width="small"
-                )
-            }
+                ),
+                "last_updated": st.column_config.TextColumn("Last Updated", width="medium")
+            },
+            disabled=["last_updated"]  # Don't allow editing the timestamp
         )
         
         col1, col2 = st.columns(2)
@@ -885,6 +953,61 @@ with tabs[5]:
             )
     else:
         st.info("No ingredient prices set yet. Add prices above to get started!")
+    
+    st.divider()
+    
+    # Price History Section
+    st.subheader("📊 Price Change History")
+    
+    price_history = load_price_history()
+    
+    if not price_history.empty:
+        # Search/filter for price history
+        history_search = st.text_input("🔍 Search price history (ingredient name):")
+        
+        history_display = price_history.copy()
+        history_display['changed_at'] = pd.to_datetime(history_display['changed_at']).dt.strftime('%Y-%m-%d %H:%M')
+        history_display = history_display.sort_values('changed_at', ascending=False)
+        
+        # Apply search filter
+        if history_search:
+            history_display = history_display[
+                history_display['ingredient'].str.contains(history_search, case=False, na=False)
+            ]
+        
+        if history_display.empty:
+            st.info("No matching price history found.")
+        else:
+            # Calculate price change percentage
+            history_display['change'] = history_display.apply(
+                lambda row: f"{((row['new_price'] - row['old_price']) / row['old_price'] * 100):.1f}%" 
+                if row['old_price'] > 0 else "New",
+                axis=1
+            )
+            
+            # Format prices
+            history_display['old_price'] = history_display['old_price'].apply(lambda x: f"£{x:.2f}")
+            history_display['new_price'] = history_display['new_price'].apply(lambda x: f"£{x:.2f}")
+            
+            # Rename columns for display
+            history_display = history_display.rename(columns={
+                "ingredient": "Ingredient",
+                "unit": "Unit",
+                "old_price": "Old Price",
+                "new_price": "New Price",
+                "change": "Change",
+                "changed_at": "Changed At"
+            })
+            
+            st.dataframe(
+                history_display[["Ingredient", "Unit", "Old Price", "New Price", "Change", "Changed At"]],
+                hide_index=True,
+                use_container_width=True
+            )
+            
+            st.caption(f"Showing {len(history_display)} price change(s)")
+    else:
+        st.info("No price changes recorded yet. Price changes will appear here when you update ingredient prices.")
 
 # ============================================================
 # ✏️ TAB 6: Add / Edit Recipes
