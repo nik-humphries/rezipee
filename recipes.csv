@@ -1,0 +1,489 @@
+recipe_id,recipe_name,ingredient,quantity,unit,category,tags,cook_time,rating,source,source_url,servings,notes,estimated_cost,prep_friendly
+f30b8de8-d41d-4747-b460-412da00362a4,Gochujang King Prawn & Tomato Tortiglioni,Garlic,2.0,clove,,"Pasta, Prawn, Asian",25,,Gousto,,2,,0.0,False
+f30b8de8-d41d-4747-b460-412da00362a4,Gochujang King Prawn & Tomato Tortiglioni,Gochujang Paste,30.0,g,,"Pasta, Prawn, Asian",25,,Gousto,,2,,0.0,False
+f30b8de8-d41d-4747-b460-412da00362a4,Gochujang King Prawn & Tomato Tortiglioni,Panko Breadcrumbs,30.0,g,,"Pasta, Prawn, Asian",25,,Gousto,,2,,0.0,False
+f30b8de8-d41d-4747-b460-412da00362a4,Gochujang King Prawn & Tomato Tortiglioni,King Prawns,171.0,g,,"Pasta, Prawn, Asian",25,,Gousto,,2,,0.0,False
+f30b8de8-d41d-4747-b460-412da00362a4,Gochujang King Prawn & Tomato Tortiglioni,Spring Greens,120.0,g,,"Pasta, Prawn, Asian",25,,Gousto,,2,,0.0,False
+f30b8de8-d41d-4747-b460-412da00362a4,Gochujang King Prawn & Tomato Tortiglioni,Soft Cheese,50.0,g,,"Pasta, Prawn, Asian",25,,Gousto,,2,,0.0,False
+f30b8de8-d41d-4747-b460-412da00362a4,Gochujang King Prawn & Tomato Tortiglioni,Tomato,2.0,units,,"Pasta, Prawn, Asian",25,,Gousto,,2,,0.0,False
+f30b8de8-d41d-4747-b460-412da00362a4,Gochujang King Prawn & Tomato Tortiglioni,Tortiglioni,200.0,g,,"Pasta, Prawn, Asian",25,,Gousto,,2,,0.0,False
+f30b8de8-d41d-4747-b460-412da00362a4,Gochujang King Prawn & Tomato Tortiglioni,Vegetable Stock,5.5,g,,"Pasta, Prawn, Asian",25,,Gousto,,2,,0.0,False
+c0702585-e5b5-4515-9947-caedce8af520,Smoky Spanish-Style King Prawns With Patatas Bravas,Red Pepper,1.0,Item,Vegetables,"Potatos, Prawns",30,,Gousto,,2,,0.0,False
+c0702585-e5b5-4515-9947-caedce8af520,Smoky Spanish-Style King Prawns With Patatas Bravas,Tomato,1.0,Item,Vegetables,"Potatos, Prawns",30,,Gousto,,2,,0.0,False
+c0702585-e5b5-4515-9947-caedce8af520,Smoky Spanish-Style King Prawns With Patatas Bravas,Yellow Pepper,1.0,Item,Vegetables,"Potatos, Prawns",30,,Gousto,,2,,0.0,False
+c0702585-e5b5-4515-9947-caedce8af520,Smoky Spanish-Style King Prawns With Patatas Bravas,Garlic,1.0,Clove,,"Potatos, Prawns",30,,Gousto,,2,,0.0,False
+c0702585-e5b5-4515-9947-caedce8af520,Smoky Spanish-Style King Prawns With Patatas Bravas,Tomato Paste,16.0,g,,"Potatos, Prawns",30,,Gousto,,2,,0.0,False
+c0702585-e5b5-4515-9947-caedce8af520,Smoky Spanish-Style King Prawns With Patatas Bravas,White Potato,3.0,Item,,"Potatos, Prawns",30,,Gousto,,2,,0.0,False
+c0702585-e5b5-4515-9947-caedce8af520,Smoky Spanish-Style King Prawns With Patatas Bravas,Mayonnaise,50.0,ml,,"Potatos, Prawns",30,,Gousto,,2,,0.0,False
+c0702585-e5b5-4515-9947-caedce8af520,Smoky Spanish-Style King Prawns With Patatas Bravas,Dried Chilli Flakes,0.5,tsp,,"Potatos, Prawns",30,,Gousto,,2,,0.0,False
+c0702585-e5b5-4515-9947-caedce8af520,Smoky Spanish-Style King Prawns With Patatas Bravas,Smoke Paprika,2.0,tsp,,"Potatos, Prawns",30,,Gousto,,2,,0.0,False
+c0702585-e5b5-4515-9947-caedce8af520,Smoky Spanish-Style King Prawns With Patatas Bravas,Raw King Prawns,171.0,g,,"Potatos, Prawns",30,,Gousto,,2,,0.0,False
+c0702585-e5b5-4515-9947-caedce8af520,Smoky Spanish-Style King Prawns With Patatas Bravas,Ground Coriander,2.0,tsp,,"Potatos, Prawns",30,,Gousto,,2,,0.0,False
+a9f72fe3-fd3a-4961-8efd-008b29e38f0f,Spicy King Prawn & Egg Singapore-Style Fried Rice,Egg,1.0,Item,,"Prawns,Rice",20,,Gousto,,2,,0.0,False
+a9f72fe3-fd3a-4961-8efd-008b29e38f0f,Spicy King Prawn & Egg Singapore-Style Fried Rice,Garlic,2.0,Cloves,,"Prawns,Rice",20,,Gousto,,2,,0.0,False
+a9f72fe3-fd3a-4961-8efd-008b29e38f0f,Spicy King Prawn & Egg Singapore-Style Fried Rice,Spring Onion,1.0,Unit,,"Prawns,Rice",20,,Gousto,,2,,0.0,False
+a9f72fe3-fd3a-4961-8efd-008b29e38f0f,Spicy King Prawn & Egg Singapore-Style Fried Rice,Soy Sauce,15.0,ml,,"Prawns,Rice",20,,Gousto,,2,,0.0,False
+a9f72fe3-fd3a-4961-8efd-008b29e38f0f,Spicy King Prawn & Egg Singapore-Style Fried Rice,Creamed Coconut,25.0,g,,"Prawns,Rice",20,,Gousto,,2,,0.0,False
+a9f72fe3-fd3a-4961-8efd-008b29e38f0f,Spicy King Prawn & Egg Singapore-Style Fried Rice,Peas,160.0,g,,"Prawns,Rice",20,,Gousto,,2,,0.0,False
+a9f72fe3-fd3a-4961-8efd-008b29e38f0f,Spicy King Prawn & Egg Singapore-Style Fried Rice,Dried Chilli Flakes,0.5,tsp,,"Prawns,Rice",20,,Gousto,,2,,0.0,False
+a9f72fe3-fd3a-4961-8efd-008b29e38f0f,Spicy King Prawn & Egg Singapore-Style Fried Rice,Ground Turmeric,0.5,tsp,,"Prawns,Rice",20,,Gousto,,2,,0.0,False
+a9f72fe3-fd3a-4961-8efd-008b29e38f0f,Spicy King Prawn & Egg Singapore-Style Fried Rice,Raw King Prawns,171.0,g,,"Prawns,Rice",20,,Gousto,,2,,0.0,False
+a9f72fe3-fd3a-4961-8efd-008b29e38f0f,Spicy King Prawn & Egg Singapore-Style Fried Rice,White Long Grain Rice,130.0,g,,"Prawns,Rice",20,,Gousto,,2,,0.0,False
+a9f72fe3-fd3a-4961-8efd-008b29e38f0f,Spicy King Prawn & Egg Singapore-Style Fried Rice,Curry Powder,0.5,tbsp,,"Prawns,Rice",20,,Gousto,,2,,0.0,False
+8d9d4823-0bb0-495f-a19f-efd78cffa1a7,Paprika King Prawns With Tomato & Coconut Dal,Baby Plum Tomatoes,125.0,g,,"Prawns,Indian",40,,Gousto,,2,,0.0,False
+8d9d4823-0bb0-495f-a19f-efd78cffa1a7,Paprika King Prawns With Tomato & Coconut Dal,Brown Onion,1.0,Item,,"Prawns,Indian",40,,Gousto,,2,,0.0,False
+8d9d4823-0bb0-495f-a19f-efd78cffa1a7,Paprika King Prawns With Tomato & Coconut Dal,Cider Vinegar,30.0,ml,,"Prawns,Indian",40,,Gousto,,2,,0.0,False
+8d9d4823-0bb0-495f-a19f-efd78cffa1a7,Paprika King Prawns With Tomato & Coconut Dal,Coriander,5.0,g,,"Prawns,Indian",40,,Gousto,,2,,0.0,False
+8d9d4823-0bb0-495f-a19f-efd78cffa1a7,Paprika King Prawns With Tomato & Coconut Dal,Curry Powder,1.0,tbsp,,"Prawns,Indian",40,,Gousto,,2,,0.0,False
+8d9d4823-0bb0-495f-a19f-efd78cffa1a7,Paprika King Prawns With Tomato & Coconut Dal,Garlic Clove,2.0,Item,,"Prawns,Indian",40,,Gousto,,2,,0.0,False
+8d9d4823-0bb0-495f-a19f-efd78cffa1a7,Paprika King Prawns With Tomato & Coconut Dal,Ground Paprika,2.0,tsp,,"Prawns,Indian",40,,Gousto,,2,,0.0,False
+8d9d4823-0bb0-495f-a19f-efd78cffa1a7,Paprika King Prawns With Tomato & Coconut Dal,Ground Turmeric,1.0,tsp,,"Prawns,Indian",40,,Gousto,,2,,0.0,False
+8d9d4823-0bb0-495f-a19f-efd78cffa1a7,Paprika King Prawns With Tomato & Coconut Dal,Naan,2.0,Item,,"Prawns,Indian",40,,Gousto,,2,,0.0,False
+8d9d4823-0bb0-495f-a19f-efd78cffa1a7,Paprika King Prawns With Tomato & Coconut Dal,Nigella Seeds,1.0,tsp,,"Prawns,Indian",40,,Gousto,,2,,0.0,False
+8d9d4823-0bb0-495f-a19f-efd78cffa1a7,Paprika King Prawns With Tomato & Coconut Dal,Raw King Prawns,171.0,g,,"Prawns,Indian",40,,Gousto,,2,,0.0,False
+8d9d4823-0bb0-495f-a19f-efd78cffa1a7,Paprika King Prawns With Tomato & Coconut Dal,Red Lentils,100.0,g,,"Prawns,Indian",40,,Gousto,,2,,0.0,False
+8d9d4823-0bb0-495f-a19f-efd78cffa1a7,Paprika King Prawns With Tomato & Coconut Dal,Solid Creamed Coconut,50.0,g,,"Prawns,Indian",40,,Gousto,,2,,0.0,False
+8d9d4823-0bb0-495f-a19f-efd78cffa1a7,Paprika King Prawns With Tomato & Coconut Dal,Vegetable Stock,11.0,g,,"Prawns,Indian",40,,Gousto,,2,,0.0,False
+99d37a4f-d846-46e1-8314-37904a3c7f9e,Creamy Gochujang Sausage & Leek Totiglioni,Leek,1.0,Item,,Pasta,20,,Gousto,,2,,0.0,False
+99d37a4f-d846-46e1-8314-37904a3c7f9e,Creamy Gochujang Sausage & Leek Totiglioni,Garlic,3.0,Cloves,,Pasta,20,,Gousto,,2,,0.0,False
+99d37a4f-d846-46e1-8314-37904a3c7f9e,Creamy Gochujang Sausage & Leek Totiglioni,Spring Onion,1.0,Item,,Pasta,20,,Gousto,,2,,0.0,False
+99d37a4f-d846-46e1-8314-37904a3c7f9e,Creamy Gochujang Sausage & Leek Totiglioni,Spinach,80.0,g,,Pasta,20,,Gousto,,2,,0.0,False
+99d37a4f-d846-46e1-8314-37904a3c7f9e,Creamy Gochujang Sausage & Leek Totiglioni,Tortiglioni,200.0,g,,Pasta,20,,Gousto,,2,,0.0,False
+99d37a4f-d846-46e1-8314-37904a3c7f9e,Creamy Gochujang Sausage & Leek Totiglioni,Soft Cheese,50.0,g,,Pasta,20,,Gousto,,2,,0.0,False
+99d37a4f-d846-46e1-8314-37904a3c7f9e,Creamy Gochujang Sausage & Leek Totiglioni,Chicken Stock,5.5,g,,Pasta,20,,Gousto,,2,,0.0,False
+99d37a4f-d846-46e1-8314-37904a3c7f9e,Creamy Gochujang Sausage & Leek Totiglioni,Gochujang Paste,30.0,g,,Pasta,20,,Gousto,,2,,0.0,False
+99d37a4f-d846-46e1-8314-37904a3c7f9e,Creamy Gochujang Sausage & Leek Totiglioni,Grated Italian Hard Cheese,30.0,g,,Pasta,20,,Gousto,,2,,0.0,False
+99d37a4f-d846-46e1-8314-37904a3c7f9e,Creamy Gochujang Sausage & Leek Totiglioni,Sausage Meat,150.0,g,,Pasta,20,,Gousto,,2,,0.0,False
+d8dc4382-3ab6-460e-8722-d76c75fb82c5,Spicy Sausace & Creamy Tomato Sauce With Fresh Tagliatelle,Garlic,1.0,Item,,Pasta,10,,Gousto,,2,,0.0,False
+d8dc4382-3ab6-460e-8722-d76c75fb82c5,Spicy Sausace & Creamy Tomato Sauce With Fresh Tagliatelle,Soft Cheese,50.0,g,,Pasta,10,,Gousto,,2,,0.0,False
+d8dc4382-3ab6-460e-8722-d76c75fb82c5,Spicy Sausace & Creamy Tomato Sauce With Fresh Tagliatelle,Dried Chilli Flakes,0.5,tsp,,Pasta,10,,Gousto,,2,,0.0,False
+d8dc4382-3ab6-460e-8722-d76c75fb82c5,Spicy Sausace & Creamy Tomato Sauce With Fresh Tagliatelle,Dried Oregano,1.0,tsp,,Pasta,10,,Gousto,,2,,0.0,False
+d8dc4382-3ab6-460e-8722-d76c75fb82c5,Spicy Sausace & Creamy Tomato Sauce With Fresh Tagliatelle,Chicken Stock,5.5,g,,Pasta,10,,Gousto,,2,,0.0,False
+d8dc4382-3ab6-460e-8722-d76c75fb82c5,Spicy Sausace & Creamy Tomato Sauce With Fresh Tagliatelle,Grated Italian Hard Cheese,30.0,g,,Pasta,10,,Gousto,,2,,0.0,False
+d8dc4382-3ab6-460e-8722-d76c75fb82c5,Spicy Sausace & Creamy Tomato Sauce With Fresh Tagliatelle,Finely Chopped Tomatoes,200.0,g,,Pasta,10,,Gousto,,2,,0.0,False
+d8dc4382-3ab6-460e-8722-d76c75fb82c5,Spicy Sausace & Creamy Tomato Sauce With Fresh Tagliatelle,Sausage Meat,150.0,g,,Pasta,10,,Gousto,,2,,0.0,False
+d8dc4382-3ab6-460e-8722-d76c75fb82c5,Spicy Sausace & Creamy Tomato Sauce With Fresh Tagliatelle,Fresh Tagliatelle,250.0,g,,Pasta,10,,Gousto,,2,,0.0,False
+93bf7c7d-7fe1-40c3-b543-7cf936049541,Carribean-Style Pork With Pineapple Salsa,Canned Pineapple,220.0,g,,,25,,Gousto,,2,,0.0,False
+93bf7c7d-7fe1-40c3-b543-7cf936049541,Carribean-Style Pork With Pineapple Salsa,Shallot,1.0,Item,,,25,,Gousto,,2,,0.0,False
+93bf7c7d-7fe1-40c3-b543-7cf936049541,Carribean-Style Pork With Pineapple Salsa,Pepper,1.0,Item,,,25,,Gousto,,2,,0.0,False
+93bf7c7d-7fe1-40c3-b543-7cf936049541,Carribean-Style Pork With Pineapple Salsa,Garlic,2.0,Cloves,,,25,,Gousto,,2,,0.0,False
+93bf7c7d-7fe1-40c3-b543-7cf936049541,Carribean-Style Pork With Pineapple Salsa,Soy Sauce,8.0,ml,,,25,,Gousto,,2,,0.0,False
+93bf7c7d-7fe1-40c3-b543-7cf936049541,Carribean-Style Pork With Pineapple Salsa,Coriander,10.0,g,,,25,,Gousto,,2,,0.0,False
+93bf7c7d-7fe1-40c3-b543-7cf936049541,Carribean-Style Pork With Pineapple Salsa,Thyme,5.0,g,,,25,,Gousto,,2,,0.0,False
+93bf7c7d-7fe1-40c3-b543-7cf936049541,Carribean-Style Pork With Pineapple Salsa,Ground Allspice,1.0,tsp,,,25,,Gousto,,2,,0.0,False
+93bf7c7d-7fe1-40c3-b543-7cf936049541,Carribean-Style Pork With Pineapple Salsa,Pork Mince,250.0,g,,,25,,Gousto,,2,,0.0,False
+93bf7c7d-7fe1-40c3-b543-7cf936049541,Carribean-Style Pork With Pineapple Salsa,Ground Paprika,1.0,tsp,,,25,,Gousto,,2,,0.0,False
+93bf7c7d-7fe1-40c3-b543-7cf936049541,Carribean-Style Pork With Pineapple Salsa,Green Chilli,1.0,Item,,,25,,Gousto,,2,,0.0,False
+93bf7c7d-7fe1-40c3-b543-7cf936049541,Carribean-Style Pork With Pineapple Salsa,Creamed Coconut,25.0,g,,,25,,Gousto,,2,,0.0,False
+93bf7c7d-7fe1-40c3-b543-7cf936049541,Carribean-Style Pork With Pineapple Salsa,Basmati Rice,130.0,g,,,25,,Gousto,,2,,0.0,False
+93bf7c7d-7fe1-40c3-b543-7cf936049541,Carribean-Style Pork With Pineapple Salsa,Ginger,15.0,g,,,25,,Gousto,,2,,0.0,False
+bdb19a23-4df9-4bde-ac3b-1d285c7bade8,Sticky Nam Jim Pork & Orange Udon Noodles,Pork Mince,250.0,g,,,25,,Gousto,,2,,0.0,False
+bdb19a23-4df9-4bde-ac3b-1d285c7bade8,Sticky Nam Jim Pork & Orange Udon Noodles,Garlic,1.0,Item,,,25,,Gousto,,2,,0.0,False
+bdb19a23-4df9-4bde-ac3b-1d285c7bade8,Sticky Nam Jim Pork & Orange Udon Noodles,Green Chilli,1.0,item,,,25,,Gousto,,2,,0.0,False
+bdb19a23-4df9-4bde-ac3b-1d285c7bade8,Sticky Nam Jim Pork & Orange Udon Noodles,Honey,25.0,g,,,25,,Gousto,,2,,0.0,False
+bdb19a23-4df9-4bde-ac3b-1d285c7bade8,Sticky Nam Jim Pork & Orange Udon Noodles,Orange,1.0,Item,,,25,,Gousto,,2,,0.0,False
+bdb19a23-4df9-4bde-ac3b-1d285c7bade8,Sticky Nam Jim Pork & Orange Udon Noodles,Rice Vinegar,15.0,ml,,,25,,Gousto,,2,,0.0,False
+bdb19a23-4df9-4bde-ac3b-1d285c7bade8,Sticky Nam Jim Pork & Orange Udon Noodles,Soy Sauce,15.0,ml,,,25,,Gousto,,2,,0.0,False
+bdb19a23-4df9-4bde-ac3b-1d285c7bade8,Sticky Nam Jim Pork & Orange Udon Noodles,Spinach,80.0,g,,,25,,Gousto,,2,,0.0,False
+bdb19a23-4df9-4bde-ac3b-1d285c7bade8,Sticky Nam Jim Pork & Orange Udon Noodles,Spring Onion,1.0,Item,,,25,,Gousto,,2,,0.0,False
+bdb19a23-4df9-4bde-ac3b-1d285c7bade8,Sticky Nam Jim Pork & Orange Udon Noodles,Tamarind Paste,15.0,g,,,25,,Gousto,,2,,0.0,False
+bdb19a23-4df9-4bde-ac3b-1d285c7bade8,Sticky Nam Jim Pork & Orange Udon Noodles,Toasted Sesame Seeds,5.0,g,,,25,,Gousto,,2,,0.0,False
+bdb19a23-4df9-4bde-ac3b-1d285c7bade8,Sticky Nam Jim Pork & Orange Udon Noodles,Udon Noodles,400.0,g,,,25,,Gousto,,2,,0.0,False
+8e55c2a5-926c-4146-b713-49046e3d87db,Satay Pork Rice With Pickled Cucumber & Radish Salad,Pork Mince,250.0,g,,,20,,Gousto,,2,,0.0,False
+8e55c2a5-926c-4146-b713-49046e3d87db,Satay Pork Rice With Pickled Cucumber & Radish Salad,Lime,1.0,Item,,,20,,Gousto,,2,,0.0,False
+8e55c2a5-926c-4146-b713-49046e3d87db,Satay Pork Rice With Pickled Cucumber & Radish Salad,Spring Onion,1.0,Item,,,20,,Gousto,,2,,0.0,False
+8e55c2a5-926c-4146-b713-49046e3d87db,Satay Pork Rice With Pickled Cucumber & Radish Salad,Cucumber,0.5,Item,,,20,,Gousto,,2,,0.0,False
+8e55c2a5-926c-4146-b713-49046e3d87db,Satay Pork Rice With Pickled Cucumber & Radish Salad,Roasted Peanuts,25.0,g,,,20,,Gousto,,2,,0.0,False
+8e55c2a5-926c-4146-b713-49046e3d87db,Satay Pork Rice With Pickled Cucumber & Radish Salad,Radishes,125.0,g,,,20,,Gousto,,2,,0.0,False
+8e55c2a5-926c-4146-b713-49046e3d87db,Satay Pork Rice With Pickled Cucumber & Radish Salad,Coriander,5.0,g,,,20,,Gousto,,2,,0.0,False
+8e55c2a5-926c-4146-b713-49046e3d87db,Satay Pork Rice With Pickled Cucumber & Radish Salad,Mint,5.0,g,,,20,,Gousto,,2,,0.0,False
+8e55c2a5-926c-4146-b713-49046e3d87db,Satay Pork Rice With Pickled Cucumber & Radish Salad,Soy Sauce,15.0,ml,,,20,,Gousto,,2,,0.0,False
+8e55c2a5-926c-4146-b713-49046e3d87db,Satay Pork Rice With Pickled Cucumber & Radish Salad,Rice Vinegar,15.0,ml,,,20,,Gousto,,2,,0.0,False
+8e55c2a5-926c-4146-b713-49046e3d87db,Satay Pork Rice With Pickled Cucumber & Radish Salad,Peanut Butter,26.0,g,,,20,,Gousto,,2,,0.0,False
+8e55c2a5-926c-4146-b713-49046e3d87db,Satay Pork Rice With Pickled Cucumber & Radish Salad,Ginger Paste,15.0,g,,,20,,Gousto,,2,,0.0,False
+8e55c2a5-926c-4146-b713-49046e3d87db,Satay Pork Rice With Pickled Cucumber & Radish Salad,Basmati Rice,130.0,g,,,20,,Gousto,,2,,0.0,False
+8e55c2a5-926c-4146-b713-49046e3d87db,Satay Pork Rice With Pickled Cucumber & Radish Salad,Chicken Stock,5.5,g,,,20,,Gousto,,2,,0.0,False
+8e55c2a5-926c-4146-b713-49046e3d87db,Satay Pork Rice With Pickled Cucumber & Radish Salad,Red Chilli Relish,25.0,g,,,20,,Gousto,,2,,0.0,False
+2f9af707-e183-4f39-ba18-1bf5b25dd256,Herby Pork Gnocchi Bolognese,Basil,10.0,g,,,10,,Gousto,,2,,0.0,False
+2f9af707-e183-4f39-ba18-1bf5b25dd256,Herby Pork Gnocchi Bolognese,Dried Basil,1.0,tsp,,,10,,Gousto,,2,,0.0,False
+2f9af707-e183-4f39-ba18-1bf5b25dd256,Herby Pork Gnocchi Bolognese,Pork Mince,250.0,g,,,10,,Gousto,,2,,0.0,False
+2f9af707-e183-4f39-ba18-1bf5b25dd256,Herby Pork Gnocchi Bolognese,Finely Chopped Tomatoes,210.0,g,,,10,,Gousto,,2,,0.0,False
+2f9af707-e183-4f39-ba18-1bf5b25dd256,Herby Pork Gnocchi Bolognese,Grated Italian Hard Cheese,35.0,g,,,10,,Gousto,,2,,0.0,False
+2f9af707-e183-4f39-ba18-1bf5b25dd256,Herby Pork Gnocchi Bolognese,Marmite,8.0,g,,,10,,Gousto,,2,,0.0,False
+2f9af707-e183-4f39-ba18-1bf5b25dd256,Herby Pork Gnocchi Bolognese,Rocket,20.0,g,,,10,,Gousto,,2,,0.0,False
+2f9af707-e183-4f39-ba18-1bf5b25dd256,Herby Pork Gnocchi Bolognese,Roasted Garlic Paste,15.0,g,,,10,,Gousto,,2,,0.0,False
+2f9af707-e183-4f39-ba18-1bf5b25dd256,Herby Pork Gnocchi Bolognese,Dried Chilli Flakes,0.5,tsp,,,10,,Gousto,,2,,0.0,False
+2f9af707-e183-4f39-ba18-1bf5b25dd256,Herby Pork Gnocchi Bolognese,Gnocchi,250.0,g,,,10,,Gousto,,2,,0.0,False
+2f9af707-e183-4f39-ba18-1bf5b25dd256,Herby Pork Gnocchi Bolognese,Dried Oregano,1.0,tbsp,,,10,,Gousto,,2,,0.0,False
+77c9bc77-518d-46b7-b4df-5fc164c18096,Marmite & Peanut Butter Pork Udon,Pork Mince,250.0,g,,,10,,Gousto,,2,,0.0,False
+77c9bc77-518d-46b7-b4df-5fc164c18096,Marmite & Peanut Butter Pork Udon,Marmite,16.0,g,,,10,,Gousto,,2,,0.0,False
+77c9bc77-518d-46b7-b4df-5fc164c18096,Marmite & Peanut Butter Pork Udon,Ginger & Garlic Paste,15.0,g,,,10,,Gousto,,2,,0.0,False
+77c9bc77-518d-46b7-b4df-5fc164c18096,Marmite & Peanut Butter Pork Udon,Red Chilli Relish,25.0,g,,,10,,Gousto,,2,,0.0,False
+77c9bc77-518d-46b7-b4df-5fc164c18096,Marmite & Peanut Butter Pork Udon,Roasted Peanuts,25.0,g,,,10,,Gousto,,2,,0.0,False
+77c9bc77-518d-46b7-b4df-5fc164c18096,Marmite & Peanut Butter Pork Udon,Peanut Butter,26.0,g,,,10,,Gousto,,2,,0.0,False
+77c9bc77-518d-46b7-b4df-5fc164c18096,Marmite & Peanut Butter Pork Udon,Soy Sauce,15.0,ml,,,10,,Gousto,,2,,0.0,False
+77c9bc77-518d-46b7-b4df-5fc164c18096,Marmite & Peanut Butter Pork Udon,Spinach,120.0,g,,,10,,Gousto,,2,,0.0,False
+77c9bc77-518d-46b7-b4df-5fc164c18096,Marmite & Peanut Butter Pork Udon,Spring Onion,1.0,Item,,,10,,Gousto,,2,,0.0,False
+77c9bc77-518d-46b7-b4df-5fc164c18096,Marmite & Peanut Butter Pork Udon,Udon Noodles,400.0,g,,,10,,Gousto,,2,,0.0,False
+f55da0d8-4c28-4017-ae22-757c5ce15ada,Creamy Carbonara-Style Bacon & Gochujang Udon,Peas,160.0,g,,,10,,Gousto,,2,,0.0,False
+f55da0d8-4c28-4017-ae22-757c5ce15ada,Creamy Carbonara-Style Bacon & Gochujang Udon,Double Cream,80.0,ml,,,10,,Gousto,,2,,0.0,False
+f55da0d8-4c28-4017-ae22-757c5ce15ada,Creamy Carbonara-Style Bacon & Gochujang Udon,Garlic,1.0,Clove,,,10,,Gousto,,2,,0.0,False
+f55da0d8-4c28-4017-ae22-757c5ce15ada,Creamy Carbonara-Style Bacon & Gochujang Udon,Gochujang Paste,30.0,g,,,10,,Gousto,,2,,0.0,False
+f55da0d8-4c28-4017-ae22-757c5ce15ada,Creamy Carbonara-Style Bacon & Gochujang Udon,Grated Italian Hard Cheese,30.0,g,,,10,,Gousto,,2,,0.0,False
+f55da0d8-4c28-4017-ae22-757c5ce15ada,Creamy Carbonara-Style Bacon & Gochujang Udon,Streaky Bacon,90.0,g,,,10,,Gousto,,2,,0.0,False
+f55da0d8-4c28-4017-ae22-757c5ce15ada,Creamy Carbonara-Style Bacon & Gochujang Udon,Spring Onion,1.0,Item,,,10,,Gousto,,2,,0.0,False
+f55da0d8-4c28-4017-ae22-757c5ce15ada,Creamy Carbonara-Style Bacon & Gochujang Udon,Toasted Sesame Seeds,5.0,g,,,10,,Gousto,,2,,0.0,False
+f55da0d8-4c28-4017-ae22-757c5ce15ada,Creamy Carbonara-Style Bacon & Gochujang Udon,Udon Noodles,400.0,g,,,10,,Gousto,,2,,0.0,False
+ce235314-b9de-48eb-a1bd-6424a61bf43f,Thai-Style Basil Pork With Green Beans,Red Chilli,1.0,Item,,,10,,Gousto,,2,,0.0,False
+ce235314-b9de-48eb-a1bd-6424a61bf43f,Thai-Style Basil Pork With Green Beans,Soy Sauce,8.0,ml,,,10,,Gousto,,2,,0.0,False
+ce235314-b9de-48eb-a1bd-6424a61bf43f,Thai-Style Basil Pork With Green Beans,Basil,20.0,g,,,10,,Gousto,,2,,0.0,False
+ce235314-b9de-48eb-a1bd-6424a61bf43f,Thai-Style Basil Pork With Green Beans,Pork Mince,250.0,g,,,10,,Gousto,,2,,0.0,False
+ce235314-b9de-48eb-a1bd-6424a61bf43f,Thai-Style Basil Pork With Green Beans,Hoisin Sauce,40.0,g,,,10,,Gousto,,2,,0.0,False
+ce235314-b9de-48eb-a1bd-6424a61bf43f,Thai-Style Basil Pork With Green Beans,Crispy Onions,15.0,g,,,10,,Gousto,,2,,0.0,False
+ce235314-b9de-48eb-a1bd-6424a61bf43f,Thai-Style Basil Pork With Green Beans,Roasted Garlic Paste,15.0,g,,,10,,Gousto,,2,,0.0,False
+ce235314-b9de-48eb-a1bd-6424a61bf43f,Thai-Style Basil Pork With Green Beans,Ginger Paste,15.0,g,,,10,,Gousto,,2,,0.0,False
+ce235314-b9de-48eb-a1bd-6424a61bf43f,Thai-Style Basil Pork With Green Beans,Green Beans,160.0,g,,,10,,Gousto,,2,,0.0,False
+ce235314-b9de-48eb-a1bd-6424a61bf43f,Thai-Style Basil Pork With Green Beans,Fish Sauce,8.0,ml,,,10,,Gousto,,2,,0.0,False
+ce235314-b9de-48eb-a1bd-6424a61bf43f,Thai-Style Basil Pork With Green Beans,Cooked White Long Grain Rice,280.0,g,,,10,,Gousto,,2,,0.0,False
+2ab6a86f-fcac-44bf-89dd-6b16e61cd5a4,Sesame Pork & Egg Fried Rice,Egg,1.0,Item,,,10,,Gousto,,2,,0.0,False
+2ab6a86f-fcac-44bf-89dd-6b16e61cd5a4,Sesame Pork & Egg Fried Rice,Spring Onion,1.0,Item,,,10,,Gousto,,2,,0.0,False
+2ab6a86f-fcac-44bf-89dd-6b16e61cd5a4,Sesame Pork & Egg Fried Rice,Pork Mince,250.0,g,,,10,,Gousto,,2,,0.0,False
+2ab6a86f-fcac-44bf-89dd-6b16e61cd5a4,Sesame Pork & Egg Fried Rice,Carrot,1.0,Item,,,10,,Gousto,,2,,0.0,False
+2ab6a86f-fcac-44bf-89dd-6b16e61cd5a4,Sesame Pork & Egg Fried Rice,Sriracha,8.0,ml,,,10,,Gousto,,2,,0.0,False
+2ab6a86f-fcac-44bf-89dd-6b16e61cd5a4,Sesame Pork & Egg Fried Rice,Soy Sauce,30.0,ml,,,10,,Gousto,,2,,0.0,False
+2ab6a86f-fcac-44bf-89dd-6b16e61cd5a4,Sesame Pork & Egg Fried Rice,Toasted Sesame Seeds,5.0,g,,,10,,Gousto,,2,,0.0,False
+2ab6a86f-fcac-44bf-89dd-6b16e61cd5a4,Sesame Pork & Egg Fried Rice,Basmati Rice,300.0,g,,,10,,Gousto,,2,,0.0,False
+2ab6a86f-fcac-44bf-89dd-6b16e61cd5a4,Sesame Pork & Egg Fried Rice,Peas,160.0,g,,,10,,Gousto,,2,,0.0,False
+2ab6a86f-fcac-44bf-89dd-6b16e61cd5a4,Sesame Pork & Egg Fried Rice,Roasted Garlic Paste,15.0,g,,,10,,Gousto,,2,,0.0,False
+2ab6a86f-fcac-44bf-89dd-6b16e61cd5a4,Sesame Pork & Egg Fried Rice,Ginger Paste,15.0,g,,,10,,Gousto,,2,,0.0,False
+2ab6a86f-fcac-44bf-89dd-6b16e61cd5a4,Sesame Pork & Egg Fried Rice,Toasted Sesame Oil,10.0,ml,,,10,,Gousto,,2,,0.0,False
+1d290a3e-2256-4e37-bdea-e457a18a105a,Sticky Sweet Chilli Pork With Rice,Red Pepper,1.0,Item,,,20,,Gousto,,2,,0.0,False
+1d290a3e-2256-4e37-bdea-e457a18a105a,Sticky Sweet Chilli Pork With Rice,Lime,1.0,Item,,,20,,Gousto,,2,,0.0,False
+1d290a3e-2256-4e37-bdea-e457a18a105a,Sticky Sweet Chilli Pork With Rice,Garlic,1.0,Cloves,,,20,,Gousto,,2,,0.0,False
+1d290a3e-2256-4e37-bdea-e457a18a105a,Sticky Sweet Chilli Pork With Rice,Spring Onion,1.0,Item,,,20,,Gousto,,2,,0.0,False
+1d290a3e-2256-4e37-bdea-e457a18a105a,Sticky Sweet Chilli Pork With Rice,Coriander,5.0,g,,,20,,Gousto,,2,,0.0,False
+1d290a3e-2256-4e37-bdea-e457a18a105a,Sticky Sweet Chilli Pork With Rice,Pork Mince,250.0,g,,,20,,Gousto,,2,,0.0,False
+1d290a3e-2256-4e37-bdea-e457a18a105a,Sticky Sweet Chilli Pork With Rice,Soy Sauce,30.0,ml,,,20,,Gousto,,2,,0.0,False
+1d290a3e-2256-4e37-bdea-e457a18a105a,Sticky Sweet Chilli Pork With Rice,Chinese Rice Wine,15.0,ml,,,20,,Gousto,,2,,0.0,False
+1d290a3e-2256-4e37-bdea-e457a18a105a,Sticky Sweet Chilli Pork With Rice,Basmati Rice,130.0,g,,,20,,Gousto,,2,,0.0,False
+1d290a3e-2256-4e37-bdea-e457a18a105a,Sticky Sweet Chilli Pork With Rice,Ginger,15.0,g,,,20,,Gousto,,2,,0.0,False
+1d290a3e-2256-4e37-bdea-e457a18a105a,Sticky Sweet Chilli Pork With Rice,Green Beans,160.0,g,,,20,,Gousto,,2,,0.0,False
+1d290a3e-2256-4e37-bdea-e457a18a105a,Sticky Sweet Chilli Pork With Rice,Red Chilli Relish,25.0,g,,,20,,Gousto,,2,,0.0,False
+1cc1f8ba-9b34-4cbb-9af7-979e574b8325,Thai-Style Crispy Pork Belly WIth Sticky Rice & Nam Jim Jaew,Shallot,1.0,Item,,,55,,Gousto,,2,,0.0,False
+1cc1f8ba-9b34-4cbb-9af7-979e574b8325,Thai-Style Crispy Pork Belly WIth Sticky Rice & Nam Jim Jaew,Lime,1.0,Item,,,55,,Gousto,,2,,0.0,False
+1cc1f8ba-9b34-4cbb-9af7-979e574b8325,Thai-Style Crispy Pork Belly WIth Sticky Rice & Nam Jim Jaew,Spring Onion,1.0,Item,,,55,,Gousto,,2,,0.0,False
+1cc1f8ba-9b34-4cbb-9af7-979e574b8325,Thai-Style Crispy Pork Belly WIth Sticky Rice & Nam Jim Jaew,Belly Pork,300.0,g,,,55,,Gousto,,2,,0.0,False
+1cc1f8ba-9b34-4cbb-9af7-979e574b8325,Thai-Style Crispy Pork Belly WIth Sticky Rice & Nam Jim Jaew,Coriander,5.0,g,,,55,,Gousto,,2,,0.0,False
+1cc1f8ba-9b34-4cbb-9af7-979e574b8325,Thai-Style Crispy Pork Belly WIth Sticky Rice & Nam Jim Jaew,Carrot,1.0,Item,,,55,,Gousto,,2,,0.0,False
+1cc1f8ba-9b34-4cbb-9af7-979e574b8325,Thai-Style Crispy Pork Belly WIth Sticky Rice & Nam Jim Jaew,Soy Sauce,15.0,ml,,,55,,Gousto,,2,,0.0,False
+1cc1f8ba-9b34-4cbb-9af7-979e574b8325,Thai-Style Crispy Pork Belly WIth Sticky Rice & Nam Jim Jaew,Sushi Rice,150.0,g,,,55,,Gousto,,2,,0.0,False
+1cc1f8ba-9b34-4cbb-9af7-979e574b8325,Thai-Style Crispy Pork Belly WIth Sticky Rice & Nam Jim Jaew,Dried Chilli Flakes,0.5,tsp,,,55,,Gousto,,2,,0.0,False
+1cc1f8ba-9b34-4cbb-9af7-979e574b8325,Thai-Style Crispy Pork Belly WIth Sticky Rice & Nam Jim Jaew,Fish Sauce,8.0,ml,,,55,,Gousto,,2,,0.0,False
+1cc1f8ba-9b34-4cbb-9af7-979e574b8325,Thai-Style Crispy Pork Belly WIth Sticky Rice & Nam Jim Jaew,Five Spice,1.0,tsp,,,55,,Gousto,,2,,0.0,False
+6eb0047b-9307-4858-8391-b9fb636bc84f,"Pork, Fennel & Red Wine Ragu With Tortiglioni",Beef Stock,5.5,g,,,20,,Gousto,,2,,0.0,False
+6eb0047b-9307-4858-8391-b9fb636bc84f,"Pork, Fennel & Red Wine Ragu With Tortiglioni",Fennel Seeds,1.0,tsp,,,20,,Gousto,,2,,0.0,False
+6eb0047b-9307-4858-8391-b9fb636bc84f,"Pork, Fennel & Red Wine Ragu With Tortiglioni",Chopped Tomatoes,200.0,g,,,20,,Gousto,,2,,0.0,False
+6eb0047b-9307-4858-8391-b9fb636bc84f,"Pork, Fennel & Red Wine Ragu With Tortiglioni",Garlic,3.0,Cloves,,,20,,Gousto,,2,,0.0,False
+6eb0047b-9307-4858-8391-b9fb636bc84f,"Pork, Fennel & Red Wine Ragu With Tortiglioni",Italian Hard Cheese,20.0,g,,,20,,Gousto,,2,,0.0,False
+6eb0047b-9307-4858-8391-b9fb636bc84f,"Pork, Fennel & Red Wine Ragu With Tortiglioni",Parsley,5.0,g,,,20,,Gousto,,2,,0.0,False
+6eb0047b-9307-4858-8391-b9fb636bc84f,"Pork, Fennel & Red Wine Ragu With Tortiglioni",Pork Mince,250.0,g,,,20,,Gousto,,2,,0.0,False
+6eb0047b-9307-4858-8391-b9fb636bc84f,"Pork, Fennel & Red Wine Ragu With Tortiglioni",Red Wine Paste,10.0,g,,,20,,Gousto,,2,,0.0,False
+6eb0047b-9307-4858-8391-b9fb636bc84f,"Pork, Fennel & Red Wine Ragu With Tortiglioni",Shallot,1.0,Item,,,20,,Gousto,,2,,0.0,False
+6eb0047b-9307-4858-8391-b9fb636bc84f,"Pork, Fennel & Red Wine Ragu With Tortiglioni",Tomato Paste,32.0,g,,,20,,Gousto,,2,,0.0,False
+6eb0047b-9307-4858-8391-b9fb636bc84f,"Pork, Fennel & Red Wine Ragu With Tortiglioni",Tortoglioni,200.0,g,,,20,,Gousto,,2,,0.0,False
+690d2f6d-4c69-424b-8666-8dfe8fde6afb,Hearty Lamb Ragu Gnocchi Bake,Brown Onion,1.0,Item,,,30,,Gousto,,2,,0.0,False
+690d2f6d-4c69-424b-8666-8dfe8fde6afb,Hearty Lamb Ragu Gnocchi Bake,Bay Leaf,1.0,Item,,,30,,Gousto,,2,,0.0,False
+690d2f6d-4c69-424b-8666-8dfe8fde6afb,Hearty Lamb Ragu Gnocchi Bake,Lamb Mince,250.0,g,,,30,,Gousto,,2,,0.0,False
+690d2f6d-4c69-424b-8666-8dfe8fde6afb,Hearty Lamb Ragu Gnocchi Bake,Spinach,80.0,g,,,30,,Gousto,,2,,0.0,False
+690d2f6d-4c69-424b-8666-8dfe8fde6afb,Hearty Lamb Ragu Gnocchi Bake,Dried Oregano,1.0,tsp,,,30,,Gousto,,2,,0.0,False
+690d2f6d-4c69-424b-8666-8dfe8fde6afb,Hearty Lamb Ragu Gnocchi Bake,Gnocchi,250.0,g,,,30,,Gousto,,2,,0.0,False
+690d2f6d-4c69-424b-8666-8dfe8fde6afb,Hearty Lamb Ragu Gnocchi Bake,Beef Stock,5.5,g,,,30,,Gousto,,2,,0.0,False
+690d2f6d-4c69-424b-8666-8dfe8fde6afb,Hearty Lamb Ragu Gnocchi Bake,Grated Italian Hard Cheese,30.0,g,,,30,,Gousto,,2,,0.0,False
+690d2f6d-4c69-424b-8666-8dfe8fde6afb,Hearty Lamb Ragu Gnocchi Bake,Chopped Tomatoes,200.0,g,,,30,,Gousto,,2,,0.0,False
+892e0235-1f37-49c6-8067-b22c11e6de29,Lamb Meatball Biryani With Minty Mayo & Pickled Onions,Red Onion,1.0,Item,,,30,,Gousto,,2,,0.0,False
+892e0235-1f37-49c6-8067-b22c11e6de29,Lamb Meatball Biryani With Minty Mayo & Pickled Onions,Garlic,2.0,Cloves,,,30,,Gousto,,2,,0.0,False
+892e0235-1f37-49c6-8067-b22c11e6de29,Lamb Meatball Biryani With Minty Mayo & Pickled Onions,Lamb Mince,250.0,g,,,30,,Gousto,,2,,0.0,False
+892e0235-1f37-49c6-8067-b22c11e6de29,Lamb Meatball Biryani With Minty Mayo & Pickled Onions,Spinach,80.0,g,,,30,,Gousto,,2,,0.0,False
+892e0235-1f37-49c6-8067-b22c11e6de29,Lamb Meatball Biryani With Minty Mayo & Pickled Onions,White Wine Vinegar,15.0,ml,,,30,,Gousto,,2,,0.0,False
+892e0235-1f37-49c6-8067-b22c11e6de29,Lamb Meatball Biryani With Minty Mayo & Pickled Onions,Mayonnaise,30.0,ml,,,30,,Gousto,,2,,0.0,False
+892e0235-1f37-49c6-8067-b22c11e6de29,Lamb Meatball Biryani With Minty Mayo & Pickled Onions,Basmati Rice,130.0,g,,,30,,Gousto,,2,,0.0,False
+892e0235-1f37-49c6-8067-b22c11e6de29,Lamb Meatball Biryani With Minty Mayo & Pickled Onions,Ground Turmeric,0.5,tsp,,,30,,Gousto,,2,,0.0,False
+892e0235-1f37-49c6-8067-b22c11e6de29,Lamb Meatball Biryani With Minty Mayo & Pickled Onions,Chicken Stock,11.0,g,,,30,,Gousto,,2,,0.0,False
+892e0235-1f37-49c6-8067-b22c11e6de29,Lamb Meatball Biryani With Minty Mayo & Pickled Onions,Mint Sauce,20.0,g,,,30,,Gousto,,2,,0.0,False
+892e0235-1f37-49c6-8067-b22c11e6de29,Lamb Meatball Biryani With Minty Mayo & Pickled Onions,Curry Powder,1.0,tbsp,,,30,,Gousto,,2,,0.0,False
+d0d2a782-100e-4db5-b99d-12ea2a35cd74,Mongolian-Style Lamb Stir-Fry WIth Garlic Rice,Lamb Mince,250.0,g,,,30,,Gousto,,2,,0.0,False
+d0d2a782-100e-4db5-b99d-12ea2a35cd74,Mongolian-Style Lamb Stir-Fry WIth Garlic Rice,Chinese Rice Wine,15.0,ml,,,30,,Gousto,,2,,0.0,False
+d0d2a782-100e-4db5-b99d-12ea2a35cd74,Mongolian-Style Lamb Stir-Fry WIth Garlic Rice,Brown Onion,1.0,Item,,,30,,Gousto,,2,,0.0,False
+d0d2a782-100e-4db5-b99d-12ea2a35cd74,Mongolian-Style Lamb Stir-Fry WIth Garlic Rice,Carrot,1.0,Item,,,30,,Gousto,,2,,0.0,False
+d0d2a782-100e-4db5-b99d-12ea2a35cd74,Mongolian-Style Lamb Stir-Fry WIth Garlic Rice,Dried Chilli Flakes,0.5,tsp,,,30,,Gousto,,2,,0.0,False
+d0d2a782-100e-4db5-b99d-12ea2a35cd74,Mongolian-Style Lamb Stir-Fry WIth Garlic Rice,Five Spice,1.0,tsp,,,30,,Gousto,,2,,0.0,False
+d0d2a782-100e-4db5-b99d-12ea2a35cd74,Mongolian-Style Lamb Stir-Fry WIth Garlic Rice,Garlic,2.0,Cloves,,,30,,Gousto,,2,,0.0,False
+d0d2a782-100e-4db5-b99d-12ea2a35cd74,Mongolian-Style Lamb Stir-Fry WIth Garlic Rice,Hoisin Sauce,40.0,g,,,30,,Gousto,,2,,0.0,False
+d0d2a782-100e-4db5-b99d-12ea2a35cd74,Mongolian-Style Lamb Stir-Fry WIth Garlic Rice,Soy Sauce,15.0,ml,,,30,,Gousto,,2,,0.0,False
+d0d2a782-100e-4db5-b99d-12ea2a35cd74,Mongolian-Style Lamb Stir-Fry WIth Garlic Rice,Spring Onion,1.0,Item,,,30,,Gousto,,2,,0.0,False
+d0d2a782-100e-4db5-b99d-12ea2a35cd74,Mongolian-Style Lamb Stir-Fry WIth Garlic Rice,Tomato Paste,16.0,g,,,30,,Gousto,,2,,0.0,False
+d0d2a782-100e-4db5-b99d-12ea2a35cd74,Mongolian-Style Lamb Stir-Fry WIth Garlic Rice,White Basmati Rice,130.0,g,,,30,,Gousto,,2,,0.0,False
+99cddff1-4ea1-47dd-9c7c-865896cf74f6,Spicy Cumin Lamb With Sesame Smash Cucumber,Garlic,2.0,Cloves,,,20,,Gousto,,2,,0.0,False
+99cddff1-4ea1-47dd-9c7c-865896cf74f6,Spicy Cumin Lamb With Sesame Smash Cucumber,Spring Onion,1.0,Item,,,20,,Gousto,,2,,0.0,False
+99cddff1-4ea1-47dd-9c7c-865896cf74f6,Spicy Cumin Lamb With Sesame Smash Cucumber,Cucumber,0.5,Item,,,20,,Gousto,,2,,0.0,False
+99cddff1-4ea1-47dd-9c7c-865896cf74f6,Spicy Cumin Lamb With Sesame Smash Cucumber,Lamb Mince,250.0,g,,,20,,Gousto,,2,,0.0,False
+99cddff1-4ea1-47dd-9c7c-865896cf74f6,Spicy Cumin Lamb With Sesame Smash Cucumber,Soy Sauce,15.0,ml,,,20,,Gousto,,2,,0.0,False
+99cddff1-4ea1-47dd-9c7c-865896cf74f6,Spicy Cumin Lamb With Sesame Smash Cucumber,Rice Vinegar,15.0,ml,,,20,,Gousto,,2,,0.0,False
+99cddff1-4ea1-47dd-9c7c-865896cf74f6,Spicy Cumin Lamb With Sesame Smash Cucumber,Toasted Sesame Seeds,5.0,g,,,20,,Gousto,,2,,0.0,False
+99cddff1-4ea1-47dd-9c7c-865896cf74f6,Spicy Cumin Lamb With Sesame Smash Cucumber,Tomato Paste,32.0,g,,,20,,Gousto,,2,,0.0,False
+99cddff1-4ea1-47dd-9c7c-865896cf74f6,Spicy Cumin Lamb With Sesame Smash Cucumber,Dried Chilli Flakes,0.5,tsp,,,20,,Gousto,,2,,0.0,False
+99cddff1-4ea1-47dd-9c7c-865896cf74f6,Spicy Cumin Lamb With Sesame Smash Cucumber,White Long Grain Rice,130.0,g,,,20,,Gousto,,2,,0.0,False
+99cddff1-4ea1-47dd-9c7c-865896cf74f6,Spicy Cumin Lamb With Sesame Smash Cucumber,Ground Cumin,1.0,tbsp,,,20,,Gousto,,2,,0.0,False
+99cddff1-4ea1-47dd-9c7c-865896cf74f6,Spicy Cumin Lamb With Sesame Smash Cucumber,Cornflour,1.0,tbsp,,,20,,Gousto,,2,,0.0,False
+2c7463c8-2503-499d-9a5a-8cd7543c2dcc,Indian Style Shephards Shepherd's Pie WIth Mustardy Greens,Lamb Mince,250.0,g,,,50,,Gousto,,2,,0.0,False
+2c7463c8-2503-499d-9a5a-8cd7543c2dcc,Indian Style Shephards Shepherd's Pie WIth Mustardy Greens,Black Mustard Seeds,1.0,tsp,,,50,,Gousto,,2,,0.0,False
+2c7463c8-2503-499d-9a5a-8cd7543c2dcc,Indian Style Shephards Shepherd's Pie WIth Mustardy Greens,Carrot,1.0,tsp,,,50,,Gousto,,2,,0.0,False
+2c7463c8-2503-499d-9a5a-8cd7543c2dcc,Indian Style Shephards Shepherd's Pie WIth Mustardy Greens,Chicken Stock,11.0,g,,,50,,Gousto,,2,,0.0,False
+2c7463c8-2503-499d-9a5a-8cd7543c2dcc,Indian Style Shephards Shepherd's Pie WIth Mustardy Greens,Dried Chilli Flakes,1.0,tsp,,,50,,Gousto,,2,,0.0,False
+2c7463c8-2503-499d-9a5a-8cd7543c2dcc,Indian Style Shephards Shepherd's Pie WIth Mustardy Greens,Garam Masala,1.0,tbsp,,,50,,Gousto,,2,,0.0,False
+2c7463c8-2503-499d-9a5a-8cd7543c2dcc,Indian Style Shephards Shepherd's Pie WIth Mustardy Greens,Garlic,2.0,Cloves,,,50,,Gousto,,2,,0.0,False
+2c7463c8-2503-499d-9a5a-8cd7543c2dcc,Indian Style Shephards Shepherd's Pie WIth Mustardy Greens,Ground Cumin,1.0,tsp,,,50,,Gousto,,2,,0.0,False
+2c7463c8-2503-499d-9a5a-8cd7543c2dcc,Indian Style Shephards Shepherd's Pie WIth Mustardy Greens,Ground Turmeric,0.5,tsp,,,50,,Gousto,,2,,0.0,False
+2c7463c8-2503-499d-9a5a-8cd7543c2dcc,Indian Style Shephards Shepherd's Pie WIth Mustardy Greens,Nigella Seeds,1.0,tsp,,,50,,Gousto,,2,,0.0,False
+2c7463c8-2503-499d-9a5a-8cd7543c2dcc,Indian Style Shephards Shepherd's Pie WIth Mustardy Greens,Red Onion,1.0,Item,,,50,,Gousto,,2,,0.0,False
+2c7463c8-2503-499d-9a5a-8cd7543c2dcc,Indian Style Shephards Shepherd's Pie WIth Mustardy Greens,Shredded Kale,120.0,g,,,50,,Gousto,,2,,0.0,False
+2c7463c8-2503-499d-9a5a-8cd7543c2dcc,Indian Style Shephards Shepherd's Pie WIth Mustardy Greens,Tomato Paste,32.0,g,,,50,,Gousto,,2,,0.0,False
+2c7463c8-2503-499d-9a5a-8cd7543c2dcc,Indian Style Shephards Shepherd's Pie WIth Mustardy Greens,White Potato,4.0,Items,,,50,,Gousto,,2,,0.0,False
+6d28a029-52b5-4080-ae79-9214b167718f,Duck Masala With Homemade Nigella Seed & Chilli Naan,Shallot,1.0,Item,,,40,,Gousto,,2,,0.0,False
+6d28a029-52b5-4080-ae79-9214b167718f,Duck Masala With Homemade Nigella Seed & Chilli Naan,Tomato,1.0,Item,,,40,,Gousto,,2,,0.0,False
+6d28a029-52b5-4080-ae79-9214b167718f,Duck Masala With Homemade Nigella Seed & Chilli Naan,Green Chilli,1.0,Item,,,40,,Gousto,,2,,0.0,False
+6d28a029-52b5-4080-ae79-9214b167718f,Duck Masala With Homemade Nigella Seed & Chilli Naan,Tomato Paste,32.0,g,,,40,,Gousto,,2,,0.0,False
+6d28a029-52b5-4080-ae79-9214b167718f,Duck Masala With Homemade Nigella Seed & Chilli Naan,Roasted Garlic Paste,15.0,g,,,40,,Gousto,,2,,0.0,False
+6d28a029-52b5-4080-ae79-9214b167718f,Duck Masala With Homemade Nigella Seed & Chilli Naan,Ginger Paste,15.0,g,,,40,,Gousto,,2,,0.0,False
+6d28a029-52b5-4080-ae79-9214b167718f,Duck Masala With Homemade Nigella Seed & Chilli Naan,Yoghurt,80.0,g,,,40,,Gousto,,2,,0.0,False
+6d28a029-52b5-4080-ae79-9214b167718f,Duck Masala With Homemade Nigella Seed & Chilli Naan,Basmati RIce,130.0,g,,,40,,Gousto,,2,,0.0,False
+6d28a029-52b5-4080-ae79-9214b167718f,Duck Masala With Homemade Nigella Seed & Chilli Naan,PIzza Base Mix,250.0,g,,,40,,Gousto,,2,,0.0,False
+6d28a029-52b5-4080-ae79-9214b167718f,Duck Masala With Homemade Nigella Seed & Chilli Naan,Dried Yeast,7.0,g,,,40,,Gousto,,2,,0.0,False
+6d28a029-52b5-4080-ae79-9214b167718f,Duck Masala With Homemade Nigella Seed & Chilli Naan,Chicken Stock,11.0,g,,,40,,Gousto,,2,,0.0,False
+6d28a029-52b5-4080-ae79-9214b167718f,Duck Masala With Homemade Nigella Seed & Chilli Naan,Duck Legs,2.0,Items,,,40,,Gousto,,2,,0.0,False
+6d28a029-52b5-4080-ae79-9214b167718f,Duck Masala With Homemade Nigella Seed & Chilli Naan,Curry Powder,1.0,tbsp,,,40,,Gousto,,2,,0.0,False
+6d28a029-52b5-4080-ae79-9214b167718f,Duck Masala With Homemade Nigella Seed & Chilli Naan,Nigella Seeds,1.0,tsp,,,40,,Gousto,,2,,0.0,False
+6d28a029-52b5-4080-ae79-9214b167718f,Duck Masala With Homemade Nigella Seed & Chilli Naan,Ground Paprika,1.0,tsp,,,40,,Gousto,,2,,0.0,False
+89f9e5a5-edf6-454b-8dff-88aa376275db,Duck A L'Orange With Hasselback Potatoes And Glazed Carrots,Duck Legs,2.0,Item,,,40,,Gousto,,2,,0.0,False
+89f9e5a5-edf6-454b-8dff-88aa376275db,Duck A L'Orange With Hasselback Potatoes And Glazed Carrots,Chantenay Carrots,160.0,g,,,40,,Gousto,,2,,0.0,False
+89f9e5a5-edf6-454b-8dff-88aa376275db,Duck A L'Orange With Hasselback Potatoes And Glazed Carrots,Chicken Stock,11.0,g,,,40,,Gousto,,2,,0.0,False
+89f9e5a5-edf6-454b-8dff-88aa376275db,Duck A L'Orange With Hasselback Potatoes And Glazed Carrots,Cornflour,1.0,tsp,,,40,,Gousto,,2,,0.0,False
+89f9e5a5-edf6-454b-8dff-88aa376275db,Duck A L'Orange With Hasselback Potatoes And Glazed Carrots,Dried Thyme,0.5,tsp,,,40,,Gousto,,2,,0.0,False
+89f9e5a5-edf6-454b-8dff-88aa376275db,Duck A L'Orange With Hasselback Potatoes And Glazed Carrots,Honey,25.0,g,,,40,,Gousto,,2,,0.0,False
+89f9e5a5-edf6-454b-8dff-88aa376275db,Duck A L'Orange With Hasselback Potatoes And Glazed Carrots,Orange,1.0,Item,,,40,,Gousto,,2,,0.0,False
+89f9e5a5-edf6-454b-8dff-88aa376275db,Duck A L'Orange With Hasselback Potatoes And Glazed Carrots,Parsley,5.0,g,,,40,,Gousto,,2,,0.0,False
+89f9e5a5-edf6-454b-8dff-88aa376275db,Duck A L'Orange With Hasselback Potatoes And Glazed Carrots,Shallot,1.0,Item,,,40,,Gousto,,2,,0.0,False
+89f9e5a5-edf6-454b-8dff-88aa376275db,Duck A L'Orange With Hasselback Potatoes And Glazed Carrots,Soy Sauce,15.0,ml,,,40,,Gousto,,2,,0.0,False
+89f9e5a5-edf6-454b-8dff-88aa376275db,Duck A L'Orange With Hasselback Potatoes And Glazed Carrots,Waxy Potatoes,400.0,g,,,40,,Gousto,,2,,0.0,False
+04da521a-684d-40c2-9985-35f9c6c83476,Creamy Chorizo & Butternut Squash Farfalle,Shallot,1.0,Items,,,20,,Gousto,,2,,0.0,False
+04da521a-684d-40c2-9985-35f9c6c83476,Creamy Chorizo & Butternut Squash Farfalle,Garlic,1.0,Cloves,,,20,,Gousto,,2,,0.0,False
+04da521a-684d-40c2-9985-35f9c6c83476,Creamy Chorizo & Butternut Squash Farfalle,Farfalle,200.0,g,,,20,,Gousto,,2,,0.0,False
+04da521a-684d-40c2-9985-35f9c6c83476,Creamy Chorizo & Butternut Squash Farfalle,Soft Cheese,100.0,g,,,20,,Gousto,,2,,0.0,False
+04da521a-684d-40c2-9985-35f9c6c83476,Creamy Chorizo & Butternut Squash Farfalle,Chorizo,100.0,g,,,20,,Gousto,,2,,0.0,False
+04da521a-684d-40c2-9985-35f9c6c83476,Creamy Chorizo & Butternut Squash Farfalle,Butternut Squash,160.0,g,,,20,,Gousto,,2,,0.0,False
+04da521a-684d-40c2-9985-35f9c6c83476,Creamy Chorizo & Butternut Squash Farfalle,Chicken Stock,5.5,g,,,20,,Gousto,,2,,0.0,False
+6fa2e1c6-6088-4328-a527-2981a545bf8b,Baked Creamy Chorizo & Leek Pasta With Rocket,Lemon,1.0,Item,,,30,,Gousto,,2,,0.0,False
+6fa2e1c6-6088-4328-a527-2981a545bf8b,Baked Creamy Chorizo & Leek Pasta With Rocket,Leek,1.0,Item,,,30,,Gousto,,2,,0.0,False
+6fa2e1c6-6088-4328-a527-2981a545bf8b,Baked Creamy Chorizo & Leek Pasta With Rocket,Tortiglioni,150.0,g,,,30,,Gousto,,2,,0.0,False
+6fa2e1c6-6088-4328-a527-2981a545bf8b,Baked Creamy Chorizo & Leek Pasta With Rocket,Chinese Rice Wine,30.0,ml,,,30,,Gousto,,2,,0.0,False
+6fa2e1c6-6088-4328-a527-2981a545bf8b,Baked Creamy Chorizo & Leek Pasta With Rocket,Rocket,20.0,g,,,30,,Gousto,,2,,0.0,False
+6fa2e1c6-6088-4328-a527-2981a545bf8b,Baked Creamy Chorizo & Leek Pasta With Rocket,Chorizo,100.0,g,,,30,,Gousto,,2,,0.0,False
+6fa2e1c6-6088-4328-a527-2981a545bf8b,Baked Creamy Chorizo & Leek Pasta With Rocket,Chicken Stock,11.0,g,,,30,,Gousto,,2,,0.0,False
+6fa2e1c6-6088-4328-a527-2981a545bf8b,Baked Creamy Chorizo & Leek Pasta With Rocket,Grated Italian Hard Cheese,30.0,g,,,30,,Gousto,,2,,0.0,False
+6fa2e1c6-6088-4328-a527-2981a545bf8b,Baked Creamy Chorizo & Leek Pasta With Rocket,Creme Fraiche,80.0,g,,,30,,Gousto,,2,,0.0,False
+e10b0150-ffe8-4356-a4eb-6d94392199b8,Chorizo & Pea Soup With Ciabatta,Peas,160.0,g,,,30,,Gousto,,2,,0.0,False
+e10b0150-ffe8-4356-a4eb-6d94392199b8,Chorizo & Pea Soup With Ciabatta,Chicken Stock,11.0,g,,,30,,Gousto,,2,,0.0,False
+e10b0150-ffe8-4356-a4eb-6d94392199b8,Chorizo & Pea Soup With Ciabatta,Ciabatta,2.0,Items,,,30,,Gousto,,2,,0.0,False
+e10b0150-ffe8-4356-a4eb-6d94392199b8,Chorizo & Pea Soup With Ciabatta,Chorizo,100.0,g,,,30,,Gousto,,2,,0.0,False
+e10b0150-ffe8-4356-a4eb-6d94392199b8,Chorizo & Pea Soup With Ciabatta,Dried Thyme,0.5,tsp,,,30,,Gousto,,2,,0.0,False
+e10b0150-ffe8-4356-a4eb-6d94392199b8,Chorizo & Pea Soup With Ciabatta,Garlic,3.0,Cloves,,,30,,Gousto,,2,,0.0,False
+e10b0150-ffe8-4356-a4eb-6d94392199b8,Chorizo & Pea Soup With Ciabatta,Leek,1.0,Items,,,30,,Gousto,,2,,0.0,False
+e10b0150-ffe8-4356-a4eb-6d94392199b8,Chorizo & Pea Soup With Ciabatta,White Potato,2.0,Items,,,30,,Gousto,,2,,0.0,False
+f39b39cc-6c78-4ce4-ba49-2edf87b07d15,West African-Style Spicy Rice With Smoky Chicken Thigh,Peas,160.0,g,,,35,,Gousto,,2,,0.0,False
+f39b39cc-6c78-4ce4-ba49-2edf87b07d15,West African-Style Spicy Rice With Smoky Chicken Thigh,Brown Onion,1.0,Item,,,35,,Gousto,,2,,0.0,False
+f39b39cc-6c78-4ce4-ba49-2edf87b07d15,West African-Style Spicy Rice With Smoky Chicken Thigh,Carrot,1.0,Item,,,35,,Gousto,,2,,0.0,False
+f39b39cc-6c78-4ce4-ba49-2edf87b07d15,West African-Style Spicy Rice With Smoky Chicken Thigh,Chicken Stock,11.0,g,,,35,,Gousto,,2,,0.0,False
+f39b39cc-6c78-4ce4-ba49-2edf87b07d15,West African-Style Spicy Rice With Smoky Chicken Thigh,Curry Powder,1.0,tbsp,,,35,,Gousto,,2,,0.0,False
+f39b39cc-6c78-4ce4-ba49-2edf87b07d15,West African-Style Spicy Rice With Smoky Chicken Thigh,Bay Leaf,1.0,Item,,,35,,Gousto,,2,,0.0,False
+f39b39cc-6c78-4ce4-ba49-2edf87b07d15,West African-Style Spicy Rice With Smoky Chicken Thigh,Dried Oregano,1.0,tsp,,,35,,Gousto,,2,,0.0,False
+f39b39cc-6c78-4ce4-ba49-2edf87b07d15,West African-Style Spicy Rice With Smoky Chicken Thigh,Garlic,1.0,Cloves,,,35,,Gousto,,2,,0.0,False
+f39b39cc-6c78-4ce4-ba49-2edf87b07d15,West African-Style Spicy Rice With Smoky Chicken Thigh,Green Chilli,1.0,Items,,,35,,Gousto,,2,,0.0,False
+f39b39cc-6c78-4ce4-ba49-2edf87b07d15,West African-Style Spicy Rice With Smoky Chicken Thigh,Ground Smoked Paprika,2.0,tsp,,,35,,Gousto,,2,,0.0,False
+f39b39cc-6c78-4ce4-ba49-2edf87b07d15,West African-Style Spicy Rice With Smoky Chicken Thigh,Ground Turmeric,0.5,tsp,,,35,,Gousto,,2,,0.0,False
+f39b39cc-6c78-4ce4-ba49-2edf87b07d15,West African-Style Spicy Rice With Smoky Chicken Thigh,Red Pepper,1.0,Items,,,35,,Gousto,,2,,0.0,False
+f39b39cc-6c78-4ce4-ba49-2edf87b07d15,West African-Style Spicy Rice With Smoky Chicken Thigh,Chicken Thighs,320.0,g,,,35,,Gousto,,2,,0.0,False
+f39b39cc-6c78-4ce4-ba49-2edf87b07d15,West African-Style Spicy Rice With Smoky Chicken Thigh,White Long Grain Rice,130.0,g,,,35,,Gousto,,2,,0.0,False
+704ae778-d52d-4a98-aa03-14353b6515ac,All-In-One Chicken Thigh & Gnocchi Cacio E Pepe,Diced Chicken Thigh,250.0,g,,,50,,Gousto,,2,,0.0,False
+704ae778-d52d-4a98-aa03-14353b6515ac,All-In-One Chicken Thigh & Gnocchi Cacio E Pepe,Balsamic Vinegar,15.0,ml,,,50,,Gousto,,2,,0.0,False
+704ae778-d52d-4a98-aa03-14353b6515ac,All-In-One Chicken Thigh & Gnocchi Cacio E Pepe,Chicken Stock,5.5,g,,,50,,Gousto,,2,,0.0,False
+704ae778-d52d-4a98-aa03-14353b6515ac,All-In-One Chicken Thigh & Gnocchi Cacio E Pepe,Cornflour,1.0,tbsp,,,50,,Gousto,,2,,0.0,False
+704ae778-d52d-4a98-aa03-14353b6515ac,All-In-One Chicken Thigh & Gnocchi Cacio E Pepe,Cracked Black Pepper,2.5,g,,,50,,Gousto,,2,,0.0,False
+704ae778-d52d-4a98-aa03-14353b6515ac,All-In-One Chicken Thigh & Gnocchi Cacio E Pepe,Gnocchi,350.0,g,,,50,,Gousto,,2,,0.0,False
+704ae778-d52d-4a98-aa03-14353b6515ac,All-In-One Chicken Thigh & Gnocchi Cacio E Pepe,Grated Italian Hard Cheese,30.0,g,,,50,,Gousto,,2,,0.0,False
+704ae778-d52d-4a98-aa03-14353b6515ac,All-In-One Chicken Thigh & Gnocchi Cacio E Pepe,Rocket,50.0,g,,,50,,Gousto,,2,,0.0,False
+704ae778-d52d-4a98-aa03-14353b6515ac,All-In-One Chicken Thigh & Gnocchi Cacio E Pepe,Soft Cheese,50.0,g,,,50,,Gousto,,2,,0.0,False
+704ae778-d52d-4a98-aa03-14353b6515ac,All-In-One Chicken Thigh & Gnocchi Cacio E Pepe,Tomato,1.0,Items,,,50,,Gousto,,2,,0.0,False
+1da9da13-38eb-45e8-b79f-d82db81d8ca3,Roast Squash Gnocchi With Chorizo & Sage,Balsamic Vinegar,15.0,ml,,,30,,Gousto,,2,,0.0,False
+1da9da13-38eb-45e8-b79f-d82db81d8ca3,Roast Squash Gnocchi With Chorizo & Sage,Butternut Squash,160.0,g,,,30,,Gousto,,2,,0.0,False
+1da9da13-38eb-45e8-b79f-d82db81d8ca3,Roast Squash Gnocchi With Chorizo & Sage,Chorizo,100.0,g,,,30,,Gousto,,2,,0.0,False
+1da9da13-38eb-45e8-b79f-d82db81d8ca3,Roast Squash Gnocchi With Chorizo & Sage,Double Cream,80.0,ml,,,30,,Gousto,,2,,0.0,False
+1da9da13-38eb-45e8-b79f-d82db81d8ca3,Roast Squash Gnocchi With Chorizo & Sage,Garlic,1.0,Cloves,,,30,,Gousto,,2,,0.0,False
+1da9da13-38eb-45e8-b79f-d82db81d8ca3,Roast Squash Gnocchi With Chorizo & Sage,Gnocchi,350.0,g,,,30,,Gousto,,2,,0.0,False
+1da9da13-38eb-45e8-b79f-d82db81d8ca3,Roast Squash Gnocchi With Chorizo & Sage,Sage,5.0,g,,,30,,Gousto,,2,,0.0,False
+1da9da13-38eb-45e8-b79f-d82db81d8ca3,Roast Squash Gnocchi With Chorizo & Sage,Seasonal Salad,50.0,g,,,30,,Gousto,,2,,0.0,False
+1da9da13-38eb-45e8-b79f-d82db81d8ca3,Roast Squash Gnocchi With Chorizo & Sage,Shallot,1.0,Items,,,30,,Gousto,,2,,0.0,False
+405c49db-9e0e-4d8d-af22-88faedf0dedc,Fiery Ruby Paneer Curry,Cayenne,0.5,tsp,,,20,,Gousto,,2,,0.0,False
+405c49db-9e0e-4d8d-af22-88faedf0dedc,Fiery Ruby Paneer Curry,Curry Powder,0.5,tbsp,,,20,,Gousto,,2,,0.0,False
+405c49db-9e0e-4d8d-af22-88faedf0dedc,Fiery Ruby Paneer Curry,Double CReam,80.0,ml,,,20,,Gousto,,2,,0.0,False
+405c49db-9e0e-4d8d-af22-88faedf0dedc,Fiery Ruby Paneer Curry,Chopped Tomatoes,200.0,g,,,20,,Gousto,,2,,0.0,False
+405c49db-9e0e-4d8d-af22-88faedf0dedc,Fiery Ruby Paneer Curry,Garam Masala,1.0,tsp,,,20,,Gousto,,2,,0.0,False
+405c49db-9e0e-4d8d-af22-88faedf0dedc,Fiery Ruby Paneer Curry,Garlic,2.0,Cloves,,,20,,Gousto,,2,,0.0,False
+405c49db-9e0e-4d8d-af22-88faedf0dedc,Fiery Ruby Paneer Curry,Smoked Paprika,2.0,tsp,,,20,,Gousto,,2,,0.0,False
+405c49db-9e0e-4d8d-af22-88faedf0dedc,Fiery Ruby Paneer Curry,Paneer,200.0,g,,,20,,Gousto,,2,,0.0,False
+405c49db-9e0e-4d8d-af22-88faedf0dedc,Fiery Ruby Paneer Curry,Red Chilli,1.0,Items,,,20,,Gousto,,2,,0.0,False
+405c49db-9e0e-4d8d-af22-88faedf0dedc,Fiery Ruby Paneer Curry,Spinach,80.0,g,,,20,,Gousto,,2,,0.0,False
+405c49db-9e0e-4d8d-af22-88faedf0dedc,Fiery Ruby Paneer Curry,Vegetable Stock,11.0,g,,,20,,Gousto,,2,,0.0,False
+405c49db-9e0e-4d8d-af22-88faedf0dedc,Fiery Ruby Paneer Curry,White Long Grain Rice,130.0,g,,,20,,Gousto,,2,,0.0,False
+588051b9-0cbb-49c2-b7e3-5f18602c5b2c,Southern Thai-Style Chicken Panang Curry,Chicken Breast,250.0,g,,,20,,Gousto,,2,,0.0,False
+588051b9-0cbb-49c2-b7e3-5f18602c5b2c,Southern Thai-Style Chicken Panang Curry,Brown Onion,1.0,Items,,,20,,Gousto,,2,,0.0,False
+588051b9-0cbb-49c2-b7e3-5f18602c5b2c,Southern Thai-Style Chicken Panang Curry,Crispy Onions,15.0,g,,,20,,Gousto,,2,,0.0,False
+588051b9-0cbb-49c2-b7e3-5f18602c5b2c,Southern Thai-Style Chicken Panang Curry,Dried Makrut Lime Leaf,2.0,Items,,,20,,Gousto,,2,,0.0,False
+588051b9-0cbb-49c2-b7e3-5f18602c5b2c,Southern Thai-Style Chicken Panang Curry,Fish Sauce,8.0,ml,,,20,,Gousto,,2,,0.0,False
+588051b9-0cbb-49c2-b7e3-5f18602c5b2c,Southern Thai-Style Chicken Panang Curry,Ground Turmeric,1.0,tsp,,,20,,Gousto,,2,,0.0,False
+588051b9-0cbb-49c2-b7e3-5f18602c5b2c,Southern Thai-Style Chicken Panang Curry,Pepper,1.0,Items,,,20,,Gousto,,2,,0.0,False
+588051b9-0cbb-49c2-b7e3-5f18602c5b2c,Southern Thai-Style Chicken Panang Curry,Red Thai Curry Paste,20.0,g,,,20,,Gousto,,2,,0.0,False
+588051b9-0cbb-49c2-b7e3-5f18602c5b2c,Southern Thai-Style Chicken Panang Curry,Peanut Butter,26.0,g,,,20,,Gousto,,2,,0.0,False
+588051b9-0cbb-49c2-b7e3-5f18602c5b2c,Southern Thai-Style Chicken Panang Curry,Creamed Coconut,50.0,g,,,20,,Gousto,,2,,0.0,False
+588051b9-0cbb-49c2-b7e3-5f18602c5b2c,Southern Thai-Style Chicken Panang Curry,White Basmati Rice,130.0,g,,,20,,Gousto,,2,,0.0,False
+80995a1a-b8b0-4348-949e-8f8619ce52c2,Spicy Xinjiang-Style Cumin Lamb Noodles,Beef Stock,5.5,g,,,20,,Gousto,,2,,0.0,False
+80995a1a-b8b0-4348-949e-8f8619ce52c2,Spicy Xinjiang-Style Cumin Lamb Noodles,Brown Onion,1.0,Items,,,20,,Gousto,,2,,0.0,False
+80995a1a-b8b0-4348-949e-8f8619ce52c2,Spicy Xinjiang-Style Cumin Lamb Noodles,Carrot,1.0,Items,,,20,,Gousto,,2,,0.0,False
+80995a1a-b8b0-4348-949e-8f8619ce52c2,Spicy Xinjiang-Style Cumin Lamb Noodles,Dried Chilli Flakes,0.5,tsp,,,20,,Gousto,,2,,0.0,False
+80995a1a-b8b0-4348-949e-8f8619ce52c2,Spicy Xinjiang-Style Cumin Lamb Noodles,Roasted Garlic Paste,15.0,g,,,20,,Gousto,,2,,0.0,False
+80995a1a-b8b0-4348-949e-8f8619ce52c2,Spicy Xinjiang-Style Cumin Lamb Noodles,Ginger Paste,15.0,g,,,20,,Gousto,,2,,0.0,False
+80995a1a-b8b0-4348-949e-8f8619ce52c2,Spicy Xinjiang-Style Cumin Lamb Noodles,Groudn Cumin,1.0,tsp,,,20,,Gousto,,2,,0.0,False
+80995a1a-b8b0-4348-949e-8f8619ce52c2,Spicy Xinjiang-Style Cumin Lamb Noodles,Lamb Mince,250.0,g,,,20,,Gousto,,2,,0.0,False
+80995a1a-b8b0-4348-949e-8f8619ce52c2,Spicy Xinjiang-Style Cumin Lamb Noodles,Soy Sauce,30.0,ml,,,20,,Gousto,,2,,0.0,False
+80995a1a-b8b0-4348-949e-8f8619ce52c2,Spicy Xinjiang-Style Cumin Lamb Noodles,Spring Onion,1.0,Items,,,20,,Gousto,,2,,0.0,False
+872a7b0f-63f7-4d28-8bbe-a11844a1a3a0,Tomato & Bacon Amatriciana Sauce With Fresh Orecchiette,Bacon Lardons,100.0,g,,,10,,Gousto,,2,,0.0,False
+872a7b0f-63f7-4d28-8bbe-a11844a1a3a0,Tomato & Bacon Amatriciana Sauce With Fresh Orecchiette,Cherry Tomatoes,125.0,g,,,10,,Gousto,,2,,0.0,False
+872a7b0f-63f7-4d28-8bbe-a11844a1a3a0,Tomato & Bacon Amatriciana Sauce With Fresh Orecchiette,Chicken Stock,11.0,g,,,10,,Gousto,,2,,0.0,False
+872a7b0f-63f7-4d28-8bbe-a11844a1a3a0,Tomato & Bacon Amatriciana Sauce With Fresh Orecchiette,Dried Chilli Flakes,0.5,tsp,,,10,,Gousto,,2,,0.0,False
+872a7b0f-63f7-4d28-8bbe-a11844a1a3a0,Tomato & Bacon Amatriciana Sauce With Fresh Orecchiette,Dried Oregano,1.0,tsp,,,10,,Gousto,,2,,0.0,False
+872a7b0f-63f7-4d28-8bbe-a11844a1a3a0,Tomato & Bacon Amatriciana Sauce With Fresh Orecchiette,Fresh Orecchiette,250.0,g,,,10,,Gousto,,2,,0.0,False
+872a7b0f-63f7-4d28-8bbe-a11844a1a3a0,Tomato & Bacon Amatriciana Sauce With Fresh Orecchiette,Garlic,2.0,Cloves,,,10,,Gousto,,2,,0.0,False
+872a7b0f-63f7-4d28-8bbe-a11844a1a3a0,Tomato & Bacon Amatriciana Sauce With Fresh Orecchiette,Grated Italian Hard Cheese,30.0,g,,,10,,Gousto,,2,,0.0,False
+872a7b0f-63f7-4d28-8bbe-a11844a1a3a0,Tomato & Bacon Amatriciana Sauce With Fresh Orecchiette,Tomato Paste,32.0,g,,,10,,Gousto,,2,,0.0,False
+7cc9eb32-7898-4026-b8a9-d2b8419410e0,Nasi Goreng With Cucumber And Sriracha,Lime,1.0,Items,,,10,,Gousto,,2,,0.0,False
+7cc9eb32-7898-4026-b8a9-d2b8419410e0,Nasi Goreng With Cucumber And Sriracha,Egg,2.0,Items,,,10,,Gousto,,2,,0.0,False
+7cc9eb32-7898-4026-b8a9-d2b8419410e0,Nasi Goreng With Cucumber And Sriracha,Soy Sauce,8.0,ml,,,10,,Gousto,,2,,0.0,False
+7cc9eb32-7898-4026-b8a9-d2b8419410e0,Nasi Goreng With Cucumber And Sriracha,Spring Onion,2.0,Items,,,10,,Gousto,,2,,0.0,False
+7cc9eb32-7898-4026-b8a9-d2b8419410e0,Nasi Goreng With Cucumber And Sriracha,Cucumber,0.5,Items,,,10,,Gousto,,2,,0.0,False
+7cc9eb32-7898-4026-b8a9-d2b8419410e0,Nasi Goreng With Cucumber And Sriracha,Roasted Peanuts,25.0,g,,,10,,Gousto,,2,,0.0,False
+7cc9eb32-7898-4026-b8a9-d2b8419410e0,Nasi Goreng With Cucumber And Sriracha,Shredded Kale,80.0,g,,,10,,Gousto,,2,,0.0,False
+7cc9eb32-7898-4026-b8a9-d2b8419410e0,Nasi Goreng With Cucumber And Sriracha,Carrot,1.0,Items,,,10,,Gousto,,2,,0.0,False
+7cc9eb32-7898-4026-b8a9-d2b8419410e0,Nasi Goreng With Cucumber And Sriracha,Sriracha,16.0,ml,,,10,,Gousto,,2,,0.0,False
+7cc9eb32-7898-4026-b8a9-d2b8419410e0,Nasi Goreng With Cucumber And Sriracha,Steamed Basmati Rice,300.0,g,,,10,,Gousto,,2,,0.0,False
+7cc9eb32-7898-4026-b8a9-d2b8419410e0,Nasi Goreng With Cucumber And Sriracha,Roasted Garlic Paste,15.0,g,,,10,,Gousto,,2,,0.0,False
+7cc9eb32-7898-4026-b8a9-d2b8419410e0,Nasi Goreng With Cucumber And Sriracha,Dried Chilli Flakes,1.0,tsp,,,10,,Gousto,,2,,0.0,False
+7cc9eb32-7898-4026-b8a9-d2b8419410e0,Nasi Goreng With Cucumber And Sriracha,Toasted Sesame Oil,20.0,ml,,,10,,Gousto,,2,,0.0,False
+6dc1898a-c1d4-4e6c-bcd2-5d3bab4741be,Miso Cacio E Pepe Udon With Crispy Fried Egg,Garlic,2.0,Cloves,,,10,,Gousto,,2,,0.0,False
+6dc1898a-c1d4-4e6c-bcd2-5d3bab4741be,Miso Cacio E Pepe Udon With Crispy Fried Egg,Spring Onion,1.0,Items,,,10,,Gousto,,2,,0.0,False
+6dc1898a-c1d4-4e6c-bcd2-5d3bab4741be,Miso Cacio E Pepe Udon With Crispy Fried Egg,Spinach,80.0,g,,,10,,Gousto,,2,,0.0,False
+6dc1898a-c1d4-4e6c-bcd2-5d3bab4741be,Miso Cacio E Pepe Udon With Crispy Fried Egg,Soft Cheese,50.0,g,,,10,,Gousto,,2,,0.0,False
+6dc1898a-c1d4-4e6c-bcd2-5d3bab4741be,Miso Cacio E Pepe Udon With Crispy Fried Egg,Cracked Black Pepper,2.5,g,,,10,,Gousto,,2,,0.0,False
+6dc1898a-c1d4-4e6c-bcd2-5d3bab4741be,Miso Cacio E Pepe Udon With Crispy Fried Egg,Udon Noodles,400.0,g,,,10,,Gousto,,2,,0.0,False
+6dc1898a-c1d4-4e6c-bcd2-5d3bab4741be,Miso Cacio E Pepe Udon With Crispy Fried Egg,Vegetable Stock,5.5,g,,,10,,Gousto,,2,,0.0,False
+6dc1898a-c1d4-4e6c-bcd2-5d3bab4741be,Miso Cacio E Pepe Udon With Crispy Fried Egg,White Miso Paste,17.0,g,,,10,,Gousto,,2,,0.0,False
+6dc1898a-c1d4-4e6c-bcd2-5d3bab4741be,Miso Cacio E Pepe Udon With Crispy Fried Egg,Grated Italian Hard Cheese,30.0,g,,,10,,Gousto,,2,,0.0,False
+6dc1898a-c1d4-4e6c-bcd2-5d3bab4741be,Miso Cacio E Pepe Udon With Crispy Fried Egg,Egg,2.0,Items,,,10,,Gousto,,2,,0.0,False
+6dc1898a-c1d4-4e6c-bcd2-5d3bab4741be,Miso Cacio E Pepe Udon With Crispy Fried Egg,Cornflour,1.0,tsp,,,10,,Gousto,,2,,0.0,False
+ae1b27b8-8aee-46e6-9a17-f1e302721836,Malaysian-Style Coconut Chicken Thigh With Rice,Chicken Thighs,320.0,g,,,40,,Gousto,,2,,0.0,False
+ae1b27b8-8aee-46e6-9a17-f1e302721836,Malaysian-Style Coconut Chicken Thigh With Rice,Cucumber,0.5,Items,,,40,,Gousto,,2,,0.0,False
+ae1b27b8-8aee-46e6-9a17-f1e302721836,Malaysian-Style Coconut Chicken Thigh With Rice,Lemongrass,1.0,Items,,,40,,Gousto,,2,,0.0,False
+ae1b27b8-8aee-46e6-9a17-f1e302721836,Malaysian-Style Coconut Chicken Thigh With Rice,Roasted Garlic Paste,15.0,g,,,40,,Gousto,,2,,0.0,False
+ae1b27b8-8aee-46e6-9a17-f1e302721836,Malaysian-Style Coconut Chicken Thigh With Rice,Ginger Paste,15.0,g,,,40,,Gousto,,2,,0.0,False
+ae1b27b8-8aee-46e6-9a17-f1e302721836,Malaysian-Style Coconut Chicken Thigh With Rice,Ground Almonds,25.0,g,,,40,,Gousto,,2,,0.0,False
+ae1b27b8-8aee-46e6-9a17-f1e302721836,Malaysian-Style Coconut Chicken Thigh With Rice,Ground Turmeric,1.0,tsp,,,40,,Gousto,,2,,0.0,False
+ae1b27b8-8aee-46e6-9a17-f1e302721836,Malaysian-Style Coconut Chicken Thigh With Rice,Red Chilli,1.0,Items,,,40,,Gousto,,2,,0.0,False
+ae1b27b8-8aee-46e6-9a17-f1e302721836,Malaysian-Style Coconut Chicken Thigh With Rice,Rice Vinegar,15.0,ml,,,40,,Gousto,,2,,0.0,False
+ae1b27b8-8aee-46e6-9a17-f1e302721836,Malaysian-Style Coconut Chicken Thigh With Rice,Shallot,1.0,Items,,,40,,Gousto,,2,,0.0,False
+ae1b27b8-8aee-46e6-9a17-f1e302721836,Malaysian-Style Coconut Chicken Thigh With Rice,Creamed Coconut,25.0,g,,,40,,Gousto,,2,,0.0,False
+ae1b27b8-8aee-46e6-9a17-f1e302721836,Malaysian-Style Coconut Chicken Thigh With Rice,Soy Sauce,15.0,ml,,,40,,Gousto,,2,,0.0,False
+ae1b27b8-8aee-46e6-9a17-f1e302721836,Malaysian-Style Coconut Chicken Thigh With Rice,Tamarind Paste,15.0,g,,,40,,Gousto,,2,,0.0,False
+ae1b27b8-8aee-46e6-9a17-f1e302721836,Malaysian-Style Coconut Chicken Thigh With Rice,White Basmatic Rice,130.0,g,,,40,,Gousto,,2,,0.0,False
+18e9d9e1-12be-4000-beb4-97ce4efa3600,Korean-Style Yang-Nyum Fried Chicken,Chicken Thighs,320.0,g,,,40,,Gousto,,2,,0.0,False
+18e9d9e1-12be-4000-beb4-97ce4efa3600,Korean-Style Yang-Nyum Fried Chicken,Carrot,1.0,Items,,,40,,Gousto,,2,,0.0,False
+18e9d9e1-12be-4000-beb4-97ce4efa3600,Korean-Style Yang-Nyum Fried Chicken,Cornflour,4.0,tbsp,,,40,,Gousto,,2,,0.0,False
+18e9d9e1-12be-4000-beb4-97ce4efa3600,Korean-Style Yang-Nyum Fried Chicken,Garlic,3.0,cloves,,,40,,Gousto,,2,,0.0,False
+18e9d9e1-12be-4000-beb4-97ce4efa3600,Korean-Style Yang-Nyum Fried Chicken,Gem Lettuce,1.0,Items,,,40,,Gousto,,2,,0.0,False
+18e9d9e1-12be-4000-beb4-97ce4efa3600,Korean-Style Yang-Nyum Fried Chicken,Gochujang Paste,30.0,g,,,40,,Gousto,,2,,0.0,False
+18e9d9e1-12be-4000-beb4-97ce4efa3600,Korean-Style Yang-Nyum Fried Chicken,Honey,25.0,g,,,40,,Gousto,,2,,0.0,False
+18e9d9e1-12be-4000-beb4-97ce4efa3600,Korean-Style Yang-Nyum Fried Chicken,Mayonnaise,30.0,ml,,,40,,Gousto,,2,,0.0,False
+18e9d9e1-12be-4000-beb4-97ce4efa3600,Korean-Style Yang-Nyum Fried Chicken,Rice Vinegar,15.0,ml,,,40,,Gousto,,2,,0.0,False
+18e9d9e1-12be-4000-beb4-97ce4efa3600,Korean-Style Yang-Nyum Fried Chicken,Soy Sauce,15.0,ml,,,40,,Gousto,,2,,0.0,False
+18e9d9e1-12be-4000-beb4-97ce4efa3600,Korean-Style Yang-Nyum Fried Chicken,Spring Onion,1.0,Items,,,40,,Gousto,,2,,0.0,False
+18e9d9e1-12be-4000-beb4-97ce4efa3600,Korean-Style Yang-Nyum Fried Chicken,Sushi Rice,150.0,g,,,40,,Gousto,,2,,0.0,False
+18e9d9e1-12be-4000-beb4-97ce4efa3600,Korean-Style Yang-Nyum Fried Chicken,Toasted Sesame Seeds,5.0,g,,,40,,Gousto,,2,,0.0,False
+18e9d9e1-12be-4000-beb4-97ce4efa3600,Korean-Style Yang-Nyum Fried Chicken,Tomato Ketchup,10.0,ml,,,40,,Gousto,,2,,0.0,False
+9b704072-40f6-4ae2-8fca-436c8f14db26,Ethiopian-Style Doro Wat With Berbere-Spiced Butter Naan,Egg,1.0,Items,,,40,,Gousto,,2,,0.0,False
+9b704072-40f6-4ae2-8fca-436c8f14db26,Ethiopian-Style Doro Wat With Berbere-Spiced Butter Naan,Chicken Thighs,320.0,g,,,40,,Gousto,,2,,0.0,False
+9b704072-40f6-4ae2-8fca-436c8f14db26,Ethiopian-Style Doro Wat With Berbere-Spiced Butter Naan,Berbere Seasoning,1.0,tbsp,,,40,,Gousto,,2,,0.0,False
+9b704072-40f6-4ae2-8fca-436c8f14db26,Ethiopian-Style Doro Wat With Berbere-Spiced Butter Naan,Brown Onion,1.0,Items,,,40,,Gousto,,2,,0.0,False
+9b704072-40f6-4ae2-8fca-436c8f14db26,Ethiopian-Style Doro Wat With Berbere-Spiced Butter Naan,Chicken Stock,11.0,g,,,40,,Gousto,,2,,0.0,False
+9b704072-40f6-4ae2-8fca-436c8f14db26,Ethiopian-Style Doro Wat With Berbere-Spiced Butter Naan,Roasted Garlic Paste,15.0,g,,,40,,Gousto,,2,,0.0,False
+9b704072-40f6-4ae2-8fca-436c8f14db26,Ethiopian-Style Doro Wat With Berbere-Spiced Butter Naan,Ginger Paste,15.0,g,,,40,,Gousto,,2,,0.0,False
+9b704072-40f6-4ae2-8fca-436c8f14db26,Ethiopian-Style Doro Wat With Berbere-Spiced Butter Naan,Parsley,5.0,g,,,40,,Gousto,,2,,0.0,False
+9b704072-40f6-4ae2-8fca-436c8f14db26,Ethiopian-Style Doro Wat With Berbere-Spiced Butter Naan,Naan,2.0,Items,,,40,,Gousto,,2,,0.0,False
+9b704072-40f6-4ae2-8fca-436c8f14db26,Ethiopian-Style Doro Wat With Berbere-Spiced Butter Naan,Tomato Paste,32.0,g,,,40,,Gousto,,2,,0.0,False
+9b704072-40f6-4ae2-8fca-436c8f14db26,Ethiopian-Style Doro Wat With Berbere-Spiced Butter Naan,White Potato,2.0,Items,,,40,,Gousto,,2,,0.0,False
+e85f4b83-e2f9-4e2c-b752-38744ef0eb38,Burmese-Style Crispy Chicken Thigh Coconut Noodles,Chicken Thigh,250.0,g,,,20,,Gousto,,2,,0.0,False
+e85f4b83-e2f9-4e2c-b752-38744ef0eb38,Burmese-Style Crispy Chicken Thigh Coconut Noodles,Slaw Mix,160.0,g,,,20,,Gousto,,2,,0.0,False
+e85f4b83-e2f9-4e2c-b752-38744ef0eb38,Burmese-Style Crispy Chicken Thigh Coconut Noodles,Cayenne Pepper,0.5,tsp,,,20,,Gousto,,2,,0.0,False
+e85f4b83-e2f9-4e2c-b752-38744ef0eb38,Burmese-Style Crispy Chicken Thigh Coconut Noodles,Chicken Stock,5.5,g,,,20,,Gousto,,2,,0.0,False
+e85f4b83-e2f9-4e2c-b752-38744ef0eb38,Burmese-Style Crispy Chicken Thigh Coconut Noodles,Coriander,5.0,g,,,20,,Gousto,,2,,0.0,False
+e85f4b83-e2f9-4e2c-b752-38744ef0eb38,Burmese-Style Crispy Chicken Thigh Coconut Noodles,Egg Noodle Nests,2.0,Items,,,20,,Gousto,,2,,0.0,False
+e85f4b83-e2f9-4e2c-b752-38744ef0eb38,Burmese-Style Crispy Chicken Thigh Coconut Noodles,Roasted Garlic Paste,15.0,g,,,20,,Gousto,,2,,0.0,False
+e85f4b83-e2f9-4e2c-b752-38744ef0eb38,Burmese-Style Crispy Chicken Thigh Coconut Noodles,Ginger Paste,15.0,g,,,20,,Gousto,,2,,0.0,False
+e85f4b83-e2f9-4e2c-b752-38744ef0eb38,Burmese-Style Crispy Chicken Thigh Coconut Noodles,Gram Flour,30.0,g,,,20,,Gousto,,2,,0.0,False
+e85f4b83-e2f9-4e2c-b752-38744ef0eb38,Burmese-Style Crispy Chicken Thigh Coconut Noodles,Smoked Paprika,1.0,tsp,,,20,,Gousto,,2,,0.0,False
+e85f4b83-e2f9-4e2c-b752-38744ef0eb38,Burmese-Style Crispy Chicken Thigh Coconut Noodles,Ground Turmeric,0.5,tsp,,,20,,Gousto,,2,,0.0,False
+e85f4b83-e2f9-4e2c-b752-38744ef0eb38,Burmese-Style Crispy Chicken Thigh Coconut Noodles,Lime,1.0,Items,,,20,,Gousto,,2,,0.0,False
+e85f4b83-e2f9-4e2c-b752-38744ef0eb38,Burmese-Style Crispy Chicken Thigh Coconut Noodles,Creamed Coconut,25.0,g,,,20,,Gousto,,2,,0.0,False
+e85f4b83-e2f9-4e2c-b752-38744ef0eb38,Burmese-Style Crispy Chicken Thigh Coconut Noodles,Soy Sauce,15.0,ml,,,20,,Gousto,,2,,0.0,False
+35b066a2-823d-4e66-8e8c-9df97d81cf7a,One-Pot Butter Chicken Totriglioni,Chicken Stock,11.0,g,,,35,,Gousto,,2,,0.0,False
+35b066a2-823d-4e66-8e8c-9df97d81cf7a,One-Pot Butter Chicken Totriglioni,Clotted Cream,40.0,g,,,35,,Gousto,,2,,0.0,False
+35b066a2-823d-4e66-8e8c-9df97d81cf7a,One-Pot Butter Chicken Totriglioni,Curry Powder,1.0,tbsp,,,35,,Gousto,,2,,0.0,False
+35b066a2-823d-4e66-8e8c-9df97d81cf7a,One-Pot Butter Chicken Totriglioni,Chicken Breast,250.0,g,,,35,,Gousto,,2,,0.0,False
+35b066a2-823d-4e66-8e8c-9df97d81cf7a,One-Pot Butter Chicken Totriglioni,Garam Masala,1.0,tsp,,,35,,Gousto,,2,,0.0,False
+35b066a2-823d-4e66-8e8c-9df97d81cf7a,One-Pot Butter Chicken Totriglioni,Roasted Garlic Paste,15.0,g,,,35,,Gousto,,2,,0.0,False
+35b066a2-823d-4e66-8e8c-9df97d81cf7a,One-Pot Butter Chicken Totriglioni,Ginger Paste,15.0,g,,,35,,Gousto,,2,,0.0,False
+35b066a2-823d-4e66-8e8c-9df97d81cf7a,One-Pot Butter Chicken Totriglioni,Shallot,1.0,Items,,,35,,Gousto,,2,,0.0,False
+35b066a2-823d-4e66-8e8c-9df97d81cf7a,One-Pot Butter Chicken Totriglioni,Spinach,80.0,g,,,35,,Gousto,,2,,0.0,False
+35b066a2-823d-4e66-8e8c-9df97d81cf7a,One-Pot Butter Chicken Totriglioni,Tomato Paste,32.0,g,,,35,,Gousto,,2,,0.0,False
+35b066a2-823d-4e66-8e8c-9df97d81cf7a,One-Pot Butter Chicken Totriglioni,Tortiglioni,200.0,g,,,35,,Gousto,,2,,0.0,False
+96393ad8-a032-440d-aa9c-6b1ed134a025,Lebanese-Style Beef Arayes With Cucumber Yoghurt Salad,Beef Mince,250.0,g,,,35,,Gousto,,2,,0.0,False
+96393ad8-a032-440d-aa9c-6b1ed134a025,Lebanese-Style Beef Arayes With Cucumber Yoghurt Salad,Baharat,1.0,tbsp,,,35,,Gousto,,2,,0.0,False
+96393ad8-a032-440d-aa9c-6b1ed134a025,Lebanese-Style Beef Arayes With Cucumber Yoghurt Salad,Beef Stock,5.5,g,,,35,,Gousto,,2,,0.0,False
+96393ad8-a032-440d-aa9c-6b1ed134a025,Lebanese-Style Beef Arayes With Cucumber Yoghurt Salad,Cucumber,0.5,Items,,,35,,Gousto,,2,,0.0,False
+96393ad8-a032-440d-aa9c-6b1ed134a025,Lebanese-Style Beef Arayes With Cucumber Yoghurt Salad,Garlic,1.0,Cloves,,,35,,Gousto,,2,,0.0,False
+96393ad8-a032-440d-aa9c-6b1ed134a025,Lebanese-Style Beef Arayes With Cucumber Yoghurt Salad,Yoghurt,80.0,g,,,35,,Gousto,,2,,0.0,False
+96393ad8-a032-440d-aa9c-6b1ed134a025,Lebanese-Style Beef Arayes With Cucumber Yoghurt Salad,Parsley,5.0,g,,,35,,Gousto,,2,,0.0,False
+96393ad8-a032-440d-aa9c-6b1ed134a025,Lebanese-Style Beef Arayes With Cucumber Yoghurt Salad,Pomegranate Molasses,15.0,g,,,35,,Gousto,,2,,0.0,False
+96393ad8-a032-440d-aa9c-6b1ed134a025,Lebanese-Style Beef Arayes With Cucumber Yoghurt Salad,Shallot,1.0,Items,,,35,,Gousto,,2,,0.0,False
+96393ad8-a032-440d-aa9c-6b1ed134a025,Lebanese-Style Beef Arayes With Cucumber Yoghurt Salad,White Potato,3.0,Items,,,35,,Gousto,,2,,0.0,False
+96393ad8-a032-440d-aa9c-6b1ed134a025,Lebanese-Style Beef Arayes With Cucumber Yoghurt Salad,Pitta,2.0,Items,,,35,,Gousto,,2,,0.0,False
+5f6f4a52-9850-43aa-a743-1ec5ef5e570a,Spiced Beef & Mango Chutney Pie With Mustard Seed Veg,Red Onion,1.0,Items,,,50,,Gousto,,2,,0.0,False
+5f6f4a52-9850-43aa-a743-1ec5ef5e570a,Spiced Beef & Mango Chutney Pie With Mustard Seed Veg,Garlic,2.0,Cloves,,,50,,Gousto,,2,,0.0,False
+5f6f4a52-9850-43aa-a743-1ec5ef5e570a,Spiced Beef & Mango Chutney Pie With Mustard Seed Veg,Soy Sauce,8.0,ml,,,50,,Gousto,,2,,0.0,False
+5f6f4a52-9850-43aa-a743-1ec5ef5e570a,Spiced Beef & Mango Chutney Pie With Mustard Seed Veg,Mango Chutney,20.0,g,,,50,,Gousto,,2,,0.0,False
+5f6f4a52-9850-43aa-a743-1ec5ef5e570a,Spiced Beef & Mango Chutney Pie With Mustard Seed Veg,Ground Turmeric,1.0,tsp,,,50,,Gousto,,2,,0.0,False
+5f6f4a52-9850-43aa-a743-1ec5ef5e570a,Spiced Beef & Mango Chutney Pie With Mustard Seed Veg,Curry Powder,1.0,tbsp,,,50,,Gousto,,2,,0.0,False
+5f6f4a52-9850-43aa-a743-1ec5ef5e570a,Spiced Beef & Mango Chutney Pie With Mustard Seed Veg,Coriander,5.0,g,,,50,,Gousto,,2,,0.0,False
+5f6f4a52-9850-43aa-a743-1ec5ef5e570a,Spiced Beef & Mango Chutney Pie With Mustard Seed Veg,Carrot,2.0,Items,,,50,,Gousto,,2,,0.0,False
+5f6f4a52-9850-43aa-a743-1ec5ef5e570a,Spiced Beef & Mango Chutney Pie With Mustard Seed Veg,Beef Mince,250.0,g,,,50,,Gousto,,2,,0.0,False
+5f6f4a52-9850-43aa-a743-1ec5ef5e570a,Spiced Beef & Mango Chutney Pie With Mustard Seed Veg,Potato,2.0,Items,,,50,,Gousto,,2,,0.0,False
+5f6f4a52-9850-43aa-a743-1ec5ef5e570a,Spiced Beef & Mango Chutney Pie With Mustard Seed Veg,Black Mustard Seeds,2.8,g,,,50,,Gousto,,2,,0.0,False
+5f6f4a52-9850-43aa-a743-1ec5ef5e570a,Spiced Beef & Mango Chutney Pie With Mustard Seed Veg,Beef Stock,11.0,g,,,50,,Gousto,,2,,0.0,False
+5f6f4a52-9850-43aa-a743-1ec5ef5e570a,Spiced Beef & Mango Chutney Pie With Mustard Seed Veg,Puff Pastry,160.0,g,,,50,,Gousto,,2,,0.0,False
+5f6f4a52-9850-43aa-a743-1ec5ef5e570a,Spiced Beef & Mango Chutney Pie With Mustard Seed Veg,Parsnip,1.0,Items,,,50,,Gousto,,2,,0.0,False
