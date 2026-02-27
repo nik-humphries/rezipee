@@ -1,1422 +1,1116 @@
+"""
+Rezipee — Recipe Manager  (MongoDB-backed)
+
+Design principles
+  • Data persisted in MongoDB Atlas — works on Streamlit Community Cloud.
+  • Connection string stored in st.secrets (`.streamlit/secrets.toml` locally,
+    Streamlit Cloud secrets UI for production).
+  • Single shared MongoClient per process (singleton).
+  • Load helpers convert Mongo documents → pandas DataFrames (same interface
+    the UI already uses).  Save helpers write DataFrames → Mongo collections.
+  • Zero st.rerun() calls.  Zero @st.cache_data.
+  • All DataFrame columns normalised to safe types on every load.
+"""
+
 import streamlit as st
 import pandas as pd
 import uuid
-import os
 from datetime import datetime
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 
-DATA_FILE = "recipes.csv"
-HISTORY_FILE = "meal_history.csv"
-PANTRY_FILE = "pantry_staples.csv"
-PRICING_FILE = "ingredient_pricing.csv"
-PRICE_HISTORY_FILE = "price_history.csv"
+# ── Page config (must be first Streamlit call) ──────────────────────────────
+st.set_page_config(page_title="Rezipee — Recipe Manager", layout="wide")
 
-# --- Load and save ---
-@st.cache_data
-def load_data():
-    if os.path.exists(DATA_FILE):
-        df = pd.read_csv(DATA_FILE)
-        # Ensure quantity is numeric
-        df['quantity'] = pd.to_numeric(df['quantity'], errors='coerce')
-        # Fill NaN values in new columns
-        for col in ['rating', 'source', 'source_url', 'servings', 'notes', 'estimated_cost', 'prep_friendly']:
-            if col not in df.columns:
-                if col == 'servings':
-                    df[col] = 2
-                elif col == 'estimated_cost':
-                    df[col] = 0.0
-                elif col == 'prep_friendly':
-                    df[col] = False
-                else:
-                    df[col] = ''
-        # Ensure servings has a default
-        df['servings'] = df['servings'].fillna(2)
-        df['estimated_cost'] = pd.to_numeric(df['estimated_cost'], errors='coerce').fillna(0.0)
-        # Ensure cook_time is string to prevent .str accessor errors
-        if 'cook_time' in df.columns:
-            df['cook_time'] = df['cook_time'].fillna('').astype(str)
-    else:
-        df = pd.DataFrame(columns=["recipe_id", "recipe_name", "ingredient", "quantity", "unit", "category", "tags", "cook_time", "rating", "source", "source_url", "servings", "notes", "estimated_cost", "prep_friendly"])
+# ── MongoDB connection (singleton per process) ──────────────────────────────
+MONGO_URI = st.secrets["mongo"]["uri"]
+MONGO_DB = st.secrets["mongo"]["db"]
+
+@st.cache_resource
+def _get_client() -> MongoClient:
+    """Return a shared MongoClient.  cached_resource lives for the process."""
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+    # Quick connectivity check
+    try:
+        client.admin.command("ping")
+    except ConnectionFailure:
+        st.error("⚠️ Cannot reach MongoDB — check your connection string.")
+        st.stop()
+    return client
+
+_db = _get_client()[MONGO_DB]
+
+# Collection handles
+COL_RECIPES = _db["recipes"]
+COL_HISTORY = _db["meal_history"]
+COL_PANTRY = _db["pantry_staples"]
+COL_PRICING = _db["ingredient_pricing"]
+COL_PRICE_HIST = _db["price_history"]
+
+# ── Column definitions ──────────────────────────────────────────────────────
+RECIPE_COLS = [
+    "recipe_id", "recipe_name", "ingredient", "quantity", "unit",
+    "category", "tags", "cook_time", "rating", "source", "source_url",
+    "servings", "notes", "estimated_cost", "prep_friendly",
+]
+
+STR_COLS = [
+    "recipe_id", "recipe_name", "ingredient", "unit", "category",
+    "tags", "cook_time", "rating", "source", "source_url", "notes",
+]
+
+
+# ── Generic helpers ─────────────────────────────────────────────────────────
+
+def _safe_str_col(df: pd.DataFrame, col: str) -> pd.DataFrame:
+    if col in df.columns:
+        df[col] = df[col].fillna("").astype(str)
     return df
 
-def save_data(df):
-    df.to_csv(DATA_FILE, index=False)
-    load_data.clear()  # Clear cache to reload fresh data
-    st.success("✅ Recipe data saved!")
 
-def load_history():
-    if os.path.exists(HISTORY_FILE):
-        df = pd.read_csv(HISTORY_FILE)
-        if 'week_start' in df.columns:
-            df['week_start'] = pd.to_datetime(df['week_start'])
-        return df
-    else:
-        return pd.DataFrame(columns=["week_start", "recipe_name"])
+def _col_to_df(collection, columns: list | None = None) -> pd.DataFrame:
+    """Read every document from *collection* into a DataFrame, dropping _id."""
+    docs = list(collection.find({}, {"_id": 0}))
+    if not docs:
+        return pd.DataFrame(columns=columns or [])
+    df = pd.DataFrame(docs)
+    # Ensure all expected columns exist
+    if columns:
+        for c in columns:
+            if c not in df.columns:
+                df[c] = ""
+    return df
 
-def save_history(df):
-    df.to_csv(HISTORY_FILE, index=False)
-    st.success("✅ Meal history saved!")
 
-def load_pantry():
-    if os.path.exists(PANTRY_FILE):
-        return pd.read_csv(PANTRY_FILE)
-    else:
-        return pd.DataFrame(columns=["ingredient"])
+def _df_to_col(collection, df: pd.DataFrame):
+    """Replace **all** documents in *collection* with rows from *df*."""
+    records = df.to_dict("records")
+    collection.delete_many({})
+    if records:
+        collection.insert_many(records)
 
-def save_pantry(df):
-    df.to_csv(PANTRY_FILE, index=False)
-    st.success("✅ Pantry staples saved!")
 
-def load_pricing():
-    if os.path.exists(PRICING_FILE):
-        df = pd.read_csv(PRICING_FILE)
-        # Add last_updated column if it doesn't exist
-        if 'last_updated' not in df.columns:
-            df['last_updated'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        return df
-    else:
+# ── Load helpers ────────────────────────────────────────────────────────────
+
+def _load_recipes() -> pd.DataFrame:
+    df = _col_to_df(COL_RECIPES, RECIPE_COLS)
+    if df.empty:
+        return pd.DataFrame(columns=RECIPE_COLS)
+    df["quantity"] = pd.to_numeric(df["quantity"], errors="coerce")
+    for col in ["rating", "source", "source_url", "servings", "notes",
+                 "estimated_cost", "prep_friendly"]:
+        if col not in df.columns:
+            df[col] = {"servings": 2, "estimated_cost": 0.0,
+                       "prep_friendly": False}.get(col, "")
+    df["servings"] = pd.to_numeric(df["servings"], errors="coerce").fillna(2).astype(int)
+    df["estimated_cost"] = pd.to_numeric(df["estimated_cost"], errors="coerce").fillna(0.0)
+    for c in STR_COLS:
+        df = _safe_str_col(df, c)
+    return df
+
+
+def _load_history() -> pd.DataFrame:
+    df = _col_to_df(COL_HISTORY, ["week_start", "recipe_name"])
+    if "week_start" in df.columns and not df.empty:
+        df["week_start"] = pd.to_datetime(df["week_start"], errors="coerce")
+    return df
+
+
+def _load_pantry() -> pd.DataFrame:
+    df = _col_to_df(COL_PANTRY, ["ingredient"])
+    df = _safe_str_col(df, "ingredient")
+    return df
+
+
+def _load_pricing() -> pd.DataFrame:
+    df = _col_to_df(COL_PRICING, ["ingredient", "unit", "price_per_unit", "last_updated"])
+    if df.empty:
         return pd.DataFrame(columns=["ingredient", "unit", "price_per_unit", "last_updated"])
+    for c in ["ingredient", "unit", "last_updated"]:
+        df = _safe_str_col(df, c)
+    df["price_per_unit"] = pd.to_numeric(df["price_per_unit"], errors="coerce").fillna(0.0)
+    return df
 
-def load_price_history():
-    if os.path.exists(PRICE_HISTORY_FILE):
-        return pd.read_csv(PRICE_HISTORY_FILE)
-    else:
+
+def _load_price_history() -> pd.DataFrame:
+    df = _col_to_df(COL_PRICE_HIST,
+                     ["ingredient", "unit", "old_price", "new_price", "changed_at"])
+    if df.empty:
         return pd.DataFrame(columns=["ingredient", "unit", "old_price", "new_price", "changed_at"])
+    for c in ["ingredient", "unit", "changed_at"]:
+        df = _safe_str_col(df, c)
+    df["old_price"] = pd.to_numeric(df["old_price"], errors="coerce").fillna(0.0)
+    df["new_price"] = pd.to_numeric(df["new_price"], errors="coerce").fillna(0.0)
+    return df
 
-def save_pricing(df):
-    # Load existing pricing to compare changes
-    existing_pricing = pd.DataFrame()
-    if os.path.exists(PRICING_FILE):
-        existing_pricing = pd.read_csv(PRICING_FILE)
-    
-    # Track changes in price history
-    price_history = load_price_history()
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
+
+# ── Save helpers ────────────────────────────────────────────────────────────
+
+def _save_recipes(df: pd.DataFrame):
+    _df_to_col(COL_RECIPES, df)
+    st.session_state["recipes"] = _load_recipes()
+
+
+def _save_history(df: pd.DataFrame):
+    # Convert Timestamps to ISO strings before storing
+    save = df.copy()
+    if "week_start" in save.columns:
+        save["week_start"] = pd.to_datetime(
+            save["week_start"], errors="coerce"
+        ).dt.strftime("%Y-%m-%d")
+    _df_to_col(COL_HISTORY, save)
+    st.session_state["meal_history"] = _load_history()
+
+
+def _save_pantry(df: pd.DataFrame):
+    _df_to_col(COL_PANTRY, df)
+    st.session_state["pantry"] = _load_pantry()
+
+
+def _save_pricing(df: pd.DataFrame):
+    """Save pricing and record any price changes in history."""
+    existing = _load_pricing()
+    history = _load_price_history()
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    new_rows = []
+
     for _, row in df.iterrows():
-        ingredient = row['ingredient']
-        unit = row['unit']
-        new_price = row['price_per_unit']
-        
-        # Find if this ingredient existed before
-        if not existing_pricing.empty:
-            existing = existing_pricing[
-                (existing_pricing['ingredient'].str.lower() == ingredient.lower()) & 
-                (existing_pricing['unit'].str.lower() == unit.lower())
+        ing = str(row["ingredient"]).strip()
+        unit = str(row["unit"]).strip()
+        new_price = float(row["price_per_unit"])
+        if not existing.empty:
+            match = existing[
+                (existing["ingredient"].str.lower() == ing.lower())
+                & (existing["unit"].str.lower() == unit.lower())
             ]
-            
-            if not existing.empty:
-                old_price = existing.iloc[0]['price_per_unit']
-                # Only record if price actually changed
-                if abs(float(old_price) - float(new_price)) > 0.001:
-                    new_history = pd.DataFrame({
-                        "ingredient": [ingredient],
-                        "unit": [unit],
-                        "old_price": [old_price],
-                        "new_price": [new_price],
-                        "changed_at": [timestamp]
-                    })
-                    price_history = pd.concat([price_history, new_history], ignore_index=True)
-            else:
-                # New ingredient - record with old_price as 0
-                new_history = pd.DataFrame({
-                    "ingredient": [ingredient],
-                    "unit": [unit],
-                    "old_price": [0.0],
-                    "new_price": [new_price],
-                    "changed_at": [timestamp]
-                })
-                price_history = pd.concat([price_history, new_history], ignore_index=True)
-    
-    # Update last_updated timestamp for all rows
-    df['last_updated'] = timestamp
-    
-    # Save both files
-    df.to_csv(PRICING_FILE, index=False)
-    price_history.to_csv(PRICE_HISTORY_FILE, index=False)
-    st.success("✅ Ingredient pricing saved!")
+            old_price = float(match.iloc[0]["price_per_unit"]) if not match.empty else 0.0
+        else:
+            old_price = 0.0
+        if abs(old_price - new_price) > 0.001:
+            new_rows.append({
+                "ingredient": ing, "unit": unit,
+                "old_price": old_price, "new_price": new_price, "changed_at": ts,
+            })
 
-def get_recipe_recommendations(recipes_df, history_df, top_n=5):
-    """Generate smart recipe recommendations"""
-    recipe_names = recipes_df["recipe_name"].unique()
-    recommendations = []
-    
-    for recipe in recipe_names:
-        recipe_data = recipes_df[recipes_df["recipe_name"] == recipe].iloc[0]
-        score = 0
-        reasons = []
-        
-        # Rating boost
-        rating = recipe_data.get('rating', '')
-        if rating and str(rating).strip() and rating != '':
-            try:
-                rating_val = float(rating)
-                score += rating_val * 10
-                if rating_val >= 4:
-                    reasons.append(f"⭐ Rated {rating_val}/5")
-            except:
-                pass
-        
-        # Check cooking history
-        if not history_df.empty:
-            times_cooked = len(history_df[history_df['recipe_name'] == recipe])
-            if times_cooked > 0:
-                last_cooked = history_df[history_df['recipe_name'] == recipe]['week_start'].max()
-                days_since = (pd.Timestamp.now() - last_cooked).days
-                
-                if days_since > 60:
+    if new_rows:
+        history = pd.concat([history, pd.DataFrame(new_rows)], ignore_index=True)
+        _df_to_col(COL_PRICE_HIST, history)
+
+    df["last_updated"] = ts
+    _df_to_col(COL_PRICING, df)
+    st.session_state["pricing"] = _load_pricing()
+
+
+# ── Session-state bootstrap ────────────────────────────────────────────────
+
+def _init_state():
+    defaults = {
+        "recipes": _load_recipes,
+        "meal_history": _load_history,
+        "pantry": _load_pantry,
+        "pricing": _load_pricing,
+        "weekly_recipes": list,
+        "daily_plan": lambda: {d: None for d in
+                               ["Monday", "Tuesday", "Wednesday", "Thursday",
+                                "Friday", "Saturday", "Sunday"]},
+        "recipe_servings": dict,
+    }
+    for key, factory in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = factory()
+
+_init_state()
+
+# Convenience aliases
+recipes: pd.DataFrame = st.session_state["recipes"]
+meal_history: pd.DataFrame = st.session_state["meal_history"]
+pantry: pd.DataFrame = st.session_state["pantry"]
+pricing: pd.DataFrame = st.session_state["pricing"]
+
+
+# ── Utility functions ───────────────────────────────────────────────────────
+
+def _unique_recipes(df: pd.DataFrame) -> list:
+    if df.empty:
+        return []
+    return sorted(df["recipe_name"].dropna().unique().tolist())
+
+
+def _unique_safe(series: pd.Series) -> list:
+    vals = series.dropna().unique().tolist()
+    return sorted({str(v) for v in vals if str(v).strip() and str(v).lower() != "nan"})
+
+
+def _lookup_price(ing: str, unit: str) -> float:
+    if pricing.empty:
+        return 0.0
+    match = pricing[
+        (pricing["ingredient"].str.lower() == ing.lower())
+        & (pricing["unit"].str.lower() == unit.lower())
+    ]
+    return float(match.iloc[0]["price_per_unit"]) if not match.empty else 0.0
+
+
+def _recipe_cost(recipe_name: str, df: pd.DataFrame = None) -> float:
+    src = df if df is not None else recipes
+    rows = src[src["recipe_name"] == recipe_name]
+    total = 0.0
+    for _, r in rows.iterrows():
+        total += float(r["quantity"] or 0) * _lookup_price(r["ingredient"], r["unit"])
+    return total
+
+
+def _get_recommendations(top_n: int = 5) -> list:
+    if recipes.empty:
+        return []
+    recs = []
+    for name in recipes["recipe_name"].unique():
+        row = recipes[recipes["recipe_name"] == name].iloc[0]
+        score, reasons = 0, []
+        try:
+            rv = float(row["rating"])
+            score += rv * 10
+            if rv >= 4:
+                reasons.append(f"⭐ Rated {rv:.0f}/5")
+        except (ValueError, TypeError):
+            pass
+        if not meal_history.empty:
+            cooked = meal_history[meal_history["recipe_name"] == name]
+            n = len(cooked)
+            if n > 0:
+                last = cooked["week_start"].max()
+                days = (pd.Timestamp.now() - last).days
+                if days > 60:
                     score += 15
-                    reasons.append(f"🕐 Not cooked in {days_since} days")
-                elif days_since < 14:
-                    score -= 20  # Cooked recently, lower priority
-                
-                if times_cooked >= 3:
-                    reasons.append(f"❤️ Favorite (cooked {times_cooked}x)")
+                    reasons.append(f"🕐 Not cooked in {days} days")
+                elif days < 14:
+                    score -= 20
+                if n >= 3:
                     score += 5
+                    reasons.append(f"❤️ Favorite ({n}×)")
             else:
                 score += 10
                 reasons.append("✨ Never tried")
         else:
             score += 10
             reasons.append("✨ Never tried")
-        
-        # Quick meals boost
-        cook_time = str(recipe_data.get('cook_time', ''))
-        if '15' in cook_time or '20' in cook_time:
+        ct = str(row.get("cook_time", ""))
+        if any(t in ct for t in ("15", "20")):
             score += 5
             reasons.append("⚡ Quick meal")
-        
-        recommendations.append({
-            'recipe': recipe,
-            'score': score,
-            'reasons': ' • '.join(reasons) if reasons else 'Good choice!'
-        })
-    
-    return sorted(recommendations, key=lambda x: x['score'], reverse=True)[:top_n]
+        recs.append({"recipe": name, "score": score,
+                      "reasons": " · ".join(reasons) or "Good choice!"})
+    recs.sort(key=lambda x: x["score"], reverse=True)
+    return recs[:top_n]
 
-recipes = load_data()
-meal_history = load_history()
-pantry_staples = load_pantry()
-ingredient_pricing = load_pricing()
 
-# Initialize session state for weekly planner
-if "weekly_recipes" not in st.session_state:
-    st.session_state.weekly_recipes = []
-if "daily_plan" not in st.session_state:
-    st.session_state.daily_plan = {day: None for day in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]}
+# ════════════════════════════════════════════════════════════════════════════
+# UI
+# ════════════════════════════════════════════════════════════════════════════
 
-st.set_page_config(page_title="Gousto Recipe Manager", layout="wide")
-st.title("🥘 Gousto Recipe Manager")
+st.title("🥘 Rezipee — Recipe Manager")
 
-# --- Tabs for better navigation ---
-tabs = st.tabs(["🏠 Dashboard", "🔎 Browse Recipes", "🧾 Weekly Planner", "📅 Calendar View", "🥫 Pantry", "💰 Ingredient Pricing", "✏️ Edit Recipes", "📚 Meal History"])
+tab_labels = [
+    "🏠 Dashboard",
+    "🔎 Browse Recipes",
+    "🧾 Weekly Planner",
+    "📅 Calendar",
+    "🥫 Pantry",
+    "💰 Pricing",
+    "✏️ Edit Recipes",
+    "📚 History",
+]
+tabs = st.tabs(tab_labels)
 
-# ============================================================
-# 🏠 TAB 0: Dashboard
-# ============================================================
+# ════════════════════════════════════════════════════════════════════════════
+# 🏠 Dashboard
+# ════════════════════════════════════════════════════════════════════════════
 with tabs[0]:
-    st.header("� Your Cooking Dashboard")
-    
-    if recipes.empty:
-        st.info("👋 Welcome! You don't have any recipes yet. Head to the **'✏️ Edit Recipes'** tab to add your first recipe!")
-        st.markdown("""
-        ### Getting Started:
-        1. Go to the **'✏️ Edit Recipes'** tab
-        2. Fill in your recipe details (name, ingredients, quantities)
-        3. Come back here to see your dashboard metrics
-        4. Use **'🧾 Weekly Planner'** to plan your meals
-        """)
-    else:
-        # Key metrics
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            total_recipes = len(recipes["recipe_name"].unique())
-            st.metric("Total Recipes", total_recipes)
-        
-        with col2:
-            rated_recipes = len(recipes[recipes['rating'].notna() & (recipes['rating'] != '')]["recipe_name"].unique())
-            st.metric("Rated Recipes", rated_recipes)
-        
-        with col3:
-            if not meal_history.empty:
-                weeks_tracked = meal_history['week_start'].nunique()
-                st.metric("Weeks Tracked", weeks_tracked)
-            else:
-                st.metric("Weeks Tracked", 0)
-        
-        with col4:
-            if not meal_history.empty:
-                total_meals = len(meal_history)
-                st.metric("Meals Cooked", total_meals)
-            else:
-                st.metric("Meals Cooked", 0)
-        
-        st.divider()
-        
-        # Smart Recommendations
-        st.subheader("🎯 Recommended for You")
-        recommendations = get_recipe_recommendations(recipes, meal_history, top_n=5)
-        
-        if recommendations:
-            for rec in recommendations:
-                col_name, col_btn = st.columns([3, 1])
-                with col_name:
-                    st.write(f"**{rec['recipe']}**")
-                    st.caption(rec['reasons'])
-                with col_btn:
-                    if st.button("Add to Plan", key=f"rec_{rec['recipe']}"):
-                        if rec['recipe'] not in st.session_state.weekly_recipes:
-                            st.session_state.weekly_recipes.append(rec['recipe'])
-                            st.success("Added!")
-                            st.rerun()
-        else:
-            st.info("Add some recipes and start cooking to get personalized recommendations!")
-        
-        st.divider()
-        
-        # Quick insights
-        col_insights1, col_insights2 = st.columns(2)
-        
-        with col_insights1:
-            st.subheader("🏆 Top Rated Recipes")
-            rated = recipes[recipes['rating'].notna() & (recipes['rating'] != '') & (recipes['rating'] != '0')]
-            if not rated.empty:
-                rated_unique = rated.drop_duplicates('recipe_name').sort_values('rating', ascending=False).head(5)
-                for _, recipe in rated_unique.iterrows():
-                    st.write(f"⭐ **{recipe['recipe_name']}** - {recipe['rating']}/5")
-            else:
-                st.info("Rate some recipes to see your favorites!")
-        
-        with col_insights2:
-            st.subheader("⚡ Quick Meals (≤ 25 min)")
-            quick_meals = recipes[recipes['cook_time'].str.contains('15|20|25', na=False, case=False)]
-            quick_names = quick_meals['recipe_name'].unique()[:5]
-            if len(quick_names) > 0:
-                for recipe in quick_names:
-                    st.write(f"⚡ **{recipe}**")
-            else:
-                st.info("No quick meals found. Add cook times to your recipes!")
-        
-        st.divider()
-        
-        # Weekly plan overview
-        if st.session_state.weekly_recipes:
-            st.subheader("📋 This Week's Plan")
-            st.write(f"You have **{len(st.session_state.weekly_recipes)}** recipes planned:")
-            for recipe in st.session_state.weekly_recipes:
-                st.write(f"• {recipe}")
-        else:
-            st.info("👈 No recipes planned yet. Go to Weekly Planner to get started!")
+    st.header("Your Cooking Dashboard")
 
-# ============================================================
-# �🔎 TAB 1: Browse & Search
-# ============================================================
+    if recipes.empty:
+        st.info(
+            "👋 Welcome! Add your first recipe in the **✏️ Edit Recipes** tab."
+        )
+    else:
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Recipes", len(_unique_recipes(recipes)))
+        rated = recipes[recipes["rating"].str.strip().ne("") & recipes["rating"].notna()]
+        c2.metric("Rated", rated["recipe_name"].nunique())
+        c3.metric("Weeks Tracked",
+                   meal_history["week_start"].nunique() if not meal_history.empty else 0)
+        c4.metric("Meals Cooked", len(meal_history))
+
+        st.divider()
+
+        st.subheader("🎯 Recommended for You")
+        recs = _get_recommendations(5)
+        if recs:
+            for r in recs:
+                lc, rc = st.columns([4, 1])
+                lc.markdown(
+                    f"**{r['recipe']}**  \n"
+                    f"<small>{r['reasons']}</small>",
+                    unsafe_allow_html=True,
+                )
+                if rc.button("➕ Plan", key=f"dash_add_{r['recipe']}"):
+                    if r["recipe"] not in st.session_state["weekly_recipes"]:
+                        st.session_state["weekly_recipes"].append(r["recipe"])
+                    st.toast(f"Added {r['recipe']} to planner")
+        else:
+            st.caption("Cook some meals to get personalised recommendations.")
+
+        st.divider()
+
+        left, right = st.columns(2)
+        with left:
+            st.subheader("🏆 Top Rated")
+            top = (rated.drop_duplicates("recipe_name")
+                   .sort_values("rating", ascending=False).head(5))
+            if not top.empty:
+                for _, rw in top.iterrows():
+                    st.write(f"⭐ **{rw['recipe_name']}** — {rw['rating']}/5")
+            else:
+                st.caption("Rate recipes to see your favourites here.")
+        with right:
+            st.subheader("⚡ Quick Meals (≤ 25 min)")
+            quick = recipes[recipes["cook_time"].str.contains(
+                r"1[0-5]|20|25", na=False, regex=True)]
+            qnames = quick["recipe_name"].unique()[:5]
+            for qn in qnames:
+                st.write(f"⚡ **{qn}**")
+            if len(qnames) == 0:
+                st.caption("Add cook times to surface quick meals.")
+
+        if st.session_state["weekly_recipes"]:
+            st.divider()
+            st.subheader("📋 This Week's Plan")
+            for rn in st.session_state["weekly_recipes"]:
+                st.write(f"• {rn}")
+
+# ════════════════════════════════════════════════════════════════════════════
+# 🔎 Browse Recipes
+# ════════════════════════════════════════════════════════════════════════════
 with tabs[1]:
     st.header("Browse & Search Recipes")
-    
+
     if recipes.empty:
-        st.info("📝 No recipes available. Go to the **'✏️ Edit Recipes'** tab to add your first recipe!")
+        st.info("No recipes yet — add one in **✏️ Edit Recipes**.")
     else:
-        search_term = st.text_input("Search by recipe or ingredient:")
+        search = st.text_input("🔍 Search by recipe or ingredient:", key="browse_search")
+        filt = recipes.copy()
+        if search:
+            mask = (
+                filt["recipe_name"].str.contains(search, case=False, na=False)
+                | filt["ingredient"].str.contains(search, case=False, na=False)
+            )
+            filt = filt[mask]
 
-        if search_term:
-            filtered = recipes[
-                recipes["recipe_name"].str.contains(search_term, case=False, na=False)
-                | recipes["ingredient"].str.contains(search_term, case=False, na=False)
-            ]
-        else:
-            filtered = recipes.copy()
-
-        if filtered.empty:
+        if filt.empty:
             st.info("No recipes match your search.")
         else:
-            for recipe in sorted(filtered["recipe_name"].unique()):
-                recipe_data = filtered[filtered["recipe_name"] == recipe].iloc[0]
-            
-                # Get current rating
-                current_rating = recipe_data.get('rating', '')
-                current_rating = '' if pd.isna(current_rating) else str(current_rating)
-            
-                # Calculate recipe cost for title
-                recipe_ingredients = filtered[filtered["recipe_name"] == recipe]
-                recipe_cost = 0
-                missing_prices_count = 0
-                for _, ing in recipe_ingredients.iterrows():
-                    price_match = ingredient_pricing[
-                        (ingredient_pricing['ingredient'].str.lower() == ing['ingredient'].lower()) & 
-                        (ingredient_pricing['unit'].str.lower() == ing['unit'].lower())
-                    ]
-                    if not price_match.empty:
-                        recipe_cost += ing['quantity'] * price_match.iloc[0]['price_per_unit']
-                    else:
-                        missing_prices_count += 1
-            
-                # Build expander title with rating and cost
-                title = recipe
-                if current_rating and current_rating.strip():
-                    title += f" ⭐ {current_rating}"
-                if recipe_cost > 0:
-                    title += f" 💰 £{recipe_cost:.2f}"
-                if missing_prices_count > 0:
-                    title += f" ⚠️"  # Warning indicator for missing prices
-            
-                # Create columns for expander and button on same row
-                col_expander, col_button = st.columns([6, 1])
-            
-                with col_expander:
-                    with st.expander(title):
-                        # Show recipe metadata
-                        col1, col2, col3 = st.columns(3)
-                        with col1:
-                            if recipe_data.get('cook_time'):
-                                st.write(f"⏱️ **Cook time:** {recipe_data['cook_time']}")
-                            # Show prep-friendly indicator
-                            if recipe_data.get('prep_friendly'):
-                                st.write("🍱 **Meal prep friendly**")
-                        with col2:
-                            if recipe_data.get('source'):
-                                st.write(f"📖 **Source:** {recipe_data['source']}")
-                        with col3:
-                            if recipe_data.get('source_url'):
-                                st.markdown(f"🔗 [Recipe Link]({recipe_data['source_url']})")
-                        
-                            # Calculate and show estimated cost based on ingredients
-                            recipe_ingredients = filtered[filtered["recipe_name"] == recipe]
-                            recipe_cost = 0
-                            for _, ing in recipe_ingredients.iterrows():
-                                price_match = ingredient_pricing[
-                                    (ingredient_pricing['ingredient'].str.lower() == ing['ingredient'].lower()) & 
-                                    (ingredient_pricing['unit'].str.lower() == ing['unit'].lower())
-                                ]
-                                if not price_match.empty:
-                                    recipe_cost += ing['quantity'] * price_match.iloc[0]['price_per_unit']
-                        
-                            if recipe_cost > 0:
-                                st.write(f"💰 **Est. Cost:** £{recipe_cost:.2f}")
-                    
-                        # Show ingredients
-                        st.dataframe(
-                            filtered[filtered["recipe_name"] == recipe][["ingredient", "quantity", "unit", "category"]],
-                            hide_index=True,
-                        )
-                    
-                        # Show warning if some ingredients are missing prices
-                        if missing_prices_count > 0:
-                            missing_items = []
-                            for _, ing in recipe_ingredients.iterrows():
-                                price_match = ingredient_pricing[
-                                    (ingredient_pricing['ingredient'].str.lower() == ing['ingredient'].lower()) & 
-                                    (ingredient_pricing['unit'].str.lower() == ing['unit'].lower())
-                                ]
-                                if price_match.empty:
-                                    missing_items.append(f"{ing['ingredient']} ({ing['unit']})")
-                        
-                            st.warning(f"⚠️ {missing_prices_count} ingredient(s) missing prices: {', '.join(missing_items)}")
-                            st.caption("💡 Add pricing in the 'Ingredient Pricing' tab for accurate cost estimates")
-                    
-                        # Rating interface
-                        col_rate, col_add = st.columns(2)
-                        with col_rate:
-                            # Fix rating index calculation
-                            rating_value = recipe_data.get('rating', '')
-                            if pd.isna(rating_value) or rating_value == '' or str(rating_value).strip() == '':
-                                rating_index = 0
-                            else:
-                                try:
-                                    rating_index = int(float(rating_value))
-                                except (ValueError, TypeError):
-                                    rating_index = 0
-                        
-                            new_rating = st.selectbox(
-                                "Rate this recipe:",
-                                ["", "1", "2", "3", "4", "5"],
-                                index=rating_index,
-                                key=f"rate_{recipe}"
-                            )
-                            if st.button("Save Rating", key=f"save_rating_{recipe}"):
-                                # Update rating for all ingredients in this recipe
-                                recipes.loc[recipes["recipe_name"] == recipe, "rating"] = new_rating if new_rating else ''
-                                save_data(recipes)
-                                st.rerun()
-                    
-                        # Show if already in weekly planner
-                        with col_add:
-                            if recipe in st.session_state.weekly_recipes:
-                                st.success("✅ In weekly plan")
-            
-                with col_button:
-                    # Toggle button for add/remove
-                    is_added = recipe in st.session_state.weekly_recipes
-                    button_label = "✅" if is_added else "➕"
-                
-                    if st.button(button_label, key=f"quick_add_{recipe}", help="Add/remove from weekly planner"):
-                        if is_added:
-                            st.session_state.weekly_recipes.remove(recipe)
-                        else:
-                            st.session_state.weekly_recipes.append(recipe)
-                    st.rerun()
+            for rname in _unique_recipes(filt):
+                rdata = filt[filt["recipe_name"] == rname].iloc[0]
+                cost = _recipe_cost(rname, filt)
 
-# ============================================================
-# 🧾 TAB 2: Weekly Planner
-# ============================================================
+                title = rname
+                rat = rdata["rating"].strip()
+                if rat:
+                    title += f"  ⭐ {rat}"
+                if cost > 0:
+                    title += f"  💰 £{cost:.2f}"
+
+                exp_col, btn_col = st.columns([6, 1])
+                with exp_col:
+                    with st.expander(title):
+                        mc1, mc2, mc3 = st.columns(3)
+                        ct = rdata["cook_time"]
+                        if ct:
+                            mc1.write(f"⏱️ {ct}")
+                        if str(rdata.get("prep_friendly", "")).lower() == "true":
+                            mc1.write("🍱 Meal-prep friendly")
+                        if rdata["source"]:
+                            mc2.write(f"📖 {rdata['source']}")
+                        if rdata["source_url"]:
+                            mc3.markdown(f"[🔗 Recipe link]({rdata['source_url']})")
+                        if cost > 0:
+                            mc3.write(f"💰 £{cost:.2f}")
+
+                        st.dataframe(
+                            filt[filt["recipe_name"] == rname][
+                                ["ingredient", "quantity", "unit", "category"]
+                            ],
+                            hide_index=True,
+                            use_container_width=True,
+                        )
+
+                        ings = filt[filt["recipe_name"] == rname]
+                        missing = [
+                            f"{r['ingredient']} ({r['unit']})"
+                            for _, r in ings.iterrows()
+                            if _lookup_price(r["ingredient"], r["unit"]) == 0
+                        ]
+                        if missing:
+                            st.warning(
+                                f"⚠️ {len(missing)} ingredient(s) missing prices: "
+                                + ", ".join(missing[:5])
+                                + ("…" if len(missing) > 5 else "")
+                            )
+
+                        with st.form(f"rate_form_{rname}"):
+                            try:
+                                idx = int(float(rat)) if rat else 0
+                            except (ValueError, TypeError):
+                                idx = 0
+                            new_rat = st.selectbox(
+                                "Rate:", ["", "1", "2", "3", "4", "5"],
+                                index=idx, key=f"rate_sel_{rname}",
+                            )
+                            if st.form_submit_button("Save rating"):
+                                recipes.loc[
+                                    recipes["recipe_name"] == rname, "rating"
+                                ] = new_rat
+                                _save_recipes(recipes)
+                                st.success("Rating saved!")
+
+                with btn_col:
+                    already = rname in st.session_state["weekly_recipes"]
+                    lbl = "✅" if already else "➕"
+                    if st.button(lbl, key=f"qk_{rname}",
+                                 help="Toggle weekly planner"):
+                        if already:
+                            st.session_state["weekly_recipes"].remove(rname)
+                        else:
+                            st.session_state["weekly_recipes"].append(rname)
+                        st.toast(f"{'Removed' if already else 'Added'} {rname}")
+
+# ════════════════════════════════════════════════════════════════════════════
+# 🧾 Weekly Planner & Shopping List
+# ════════════════════════════════════════════════════════════════════════════
 with tabs[2]:
     st.header("Weekly Planner & Shopping List")
-    
+
     if recipes.empty:
-        st.info("📝 No recipes available. Go to the **'✏️ Edit Recipes'** tab to add recipes first!")
+        st.info("Add recipes first in **✏️ Edit Recipes**.")
     else:
-        recipe_names = sorted(recipes["recipe_name"].unique())
-        
-        # Pre-populate with session state recipes
-        if st.session_state.weekly_recipes:
-            # Filter to only include recipes that still exist in the data
-            st.session_state.weekly_recipes = [r for r in st.session_state.weekly_recipes if r in recipe_names]
-        
-        selected_recipes = st.multiselect(
-            "Select recipes for your week:",
-                options=recipe_names,
-                default=st.session_state.weekly_recipes
-            )
-    
-    # Update session state when selection changes
-        st.session_state.weekly_recipes = selected_recipes
+        all_names = _unique_recipes(recipes)
+        st.session_state["weekly_recipes"] = [
+            r for r in st.session_state["weekly_recipes"] if r in all_names
+        ]
 
-        if selected_recipes:
-        # Servings adjustment
+        selected = st.multiselect(
+            "Select recipes for this week:",
+            options=all_names,
+            default=st.session_state["weekly_recipes"],
+            key="planner_select",
+        )
+        st.session_state["weekly_recipes"] = selected
+
+        if selected:
             st.subheader("👥 Adjust Servings")
-            st.write("Adjust the number of servings for your recipes (default is based on each recipe's serving size):")
-        
-        # Initialize servings state
-            if "recipe_servings" not in st.session_state:
-                st.session_state.recipe_servings = {}
-        
-            servings_col1, servings_col2, servings_col3 = st.columns(3)
-            servings_multipliers = {}
-        
-            for idx, recipe in enumerate(selected_recipes):
-                recipe_data = recipes[recipes["recipe_name"] == recipe].iloc[0]
-                default_servings = int(recipe_data.get('servings', 2))
-            
-                col = [servings_col1, servings_col2, servings_col3][idx % 3]
-                with col:
-                    servings = st.number_input(
-                        f"{recipe}",
-                        min_value=1,
-                        max_value=20,
-                        value=st.session_state.recipe_servings.get(recipe, default_servings),
-                        key=f"servings_{recipe}"
+            cols3 = st.columns(3)
+            multipliers = {}
+            for i, rn in enumerate(selected):
+                rd = recipes[recipes["recipe_name"] == rn].iloc[0]
+                default_s = int(rd["servings"]) if pd.notna(rd["servings"]) else 2
+                with cols3[i % 3]:
+                    s = st.number_input(
+                        rn, min_value=1, max_value=20,
+                        value=st.session_state["recipe_servings"].get(rn, default_s),
+                        key=f"srv_{rn}",
                     )
-                    st.session_state.recipe_servings[recipe] = servings
-                    servings_multipliers[recipe] = servings / default_servings
-        
-        # Scale quantities based on servings
-            selected_data = recipes[recipes["recipe_name"].isin(selected_recipes)].copy()
-            for recipe, multiplier in servings_multipliers.items():
-                selected_data.loc[selected_data["recipe_name"] == recipe, "quantity"] *= multiplier
-        
-            shopping_list = (
-                selected_data
-                .groupby(["ingredient", "unit", "category"], as_index=False)
-                .agg({
-                    "quantity": "sum",
-                    "recipe_name": lambda x: ", ".join(sorted(set(x)))
-                })
-                .sort_values(by=["category", "ingredient"])
-                .rename(columns={"recipe_name": "used_in_recipes"})
-            )
-        
-        # Exclude pantry staples
-            if not pantry_staples.empty:
-                pantry_list = pantry_staples['ingredient'].str.lower().tolist()
-                shopping_list = shopping_list[~shopping_list['ingredient'].str.lower().isin(pantry_list)]
-            
-                excluded_count = len(selected_data) - len(shopping_list)
-                if excluded_count > 0:
-                    st.info(f"ℹ️ Excluded {excluded_count} pantry staples from shopping list")
-        
-        # Add pricing to shopping list
-            shopping_list['price_per_unit'] = shopping_list.apply(
-                lambda row: ingredient_pricing[
-                    (ingredient_pricing['ingredient'].str.lower() == row['ingredient'].lower()) & 
-                    (ingredient_pricing['unit'].str.lower() == row['unit'].lower())
-                ]['price_per_unit'].iloc[0] if not ingredient_pricing[
-                    (ingredient_pricing['ingredient'].str.lower() == row['ingredient'].lower()) & 
-                    (ingredient_pricing['unit'].str.lower() == row['unit'].lower())
-                ].empty else 0,
-                axis=1
-            )
-            shopping_list['item_cost'] = shopping_list['quantity'] * shopping_list['price_per_unit']
-        
-        # Reorder columns for better display
-            shopping_list = shopping_list[["category", "ingredient", "quantity", "unit", "price_per_unit", "item_cost", "used_in_recipes"]]
+                    st.session_state["recipe_servings"][rn] = s
+                    multipliers[rn] = s / max(default_s, 1)
 
-            st.subheader("🛒 Combined Shopping List")
-        
-        # Calculate estimated cost based on ingredient pricing
-            shopping_list_cost = shopping_list['item_cost'].sum()
-            items_without_price = shopping_list[shopping_list['price_per_unit'] == 0]
-        
-        # Calculate meal cost from selected_data (includes all ingredients even if in pantry)
-            meal_cost = 0
-            recipe_costs = {}
-            for recipe in selected_recipes:
-                recipe_data = selected_data[selected_data["recipe_name"] == recipe]
-                recipe_cost_val = 0
-                for _, item in recipe_data.iterrows():
-                    price_match = ingredient_pricing[
-                        (ingredient_pricing['ingredient'].str.lower() == item['ingredient'].lower()) & 
-                        (ingredient_pricing['unit'].str.lower() == item['unit'].lower())
-                    ]
-                
-                    if not price_match.empty:
-                        price_per_unit = price_match.iloc[0]['price_per_unit']
-                        item_cost = item['quantity'] * price_per_unit
-                        recipe_cost_val += item_cost
-                        meal_cost += item_cost
-                recipe_costs[recipe] = recipe_cost_val
-        
-        # Display cost summary statistics
+            sel_df = recipes[recipes["recipe_name"].isin(selected)].copy()
+            for rn, mult in multipliers.items():
+                sel_df.loc[sel_df["recipe_name"] == rn, "quantity"] *= mult
+
+            shop = (
+                sel_df.groupby(["ingredient", "unit", "category"], as_index=False)
+                .agg(quantity=("quantity", "sum"),
+                     used_in=("recipe_name", lambda x: ", ".join(sorted(set(x)))))
+                .sort_values(["category", "ingredient"])
+            )
+
+            if not pantry.empty:
+                pantry_lower = set(pantry["ingredient"].str.lower())
+                before = len(shop)
+                shop = shop[~shop["ingredient"].str.lower().isin(pantry_lower)]
+                excluded = before - len(shop)
+                if excluded:
+                    st.info(f"Excluded {excluded} pantry staple(s) from shopping list.")
+
+            shop["price_per_unit"] = shop.apply(
+                lambda r: _lookup_price(r["ingredient"], r["unit"]), axis=1)
+            shop["item_cost"] = shop["quantity"] * shop["price_per_unit"]
+
             st.subheader("💰 Cost Summary")
-        
-            col_cost1, col_cost2, col_cost3 = st.columns(3)
-            with col_cost1:
-                if meal_cost > 0:
-                    st.metric("🍽️ Total Meal Cost", f"£{meal_cost:.2f}", help="Cost of all ingredients including pantry staples")
-            with col_cost2:
-                if shopping_list_cost > 0:
-                    st.metric("🛒 Shopping List Cost", f"£{shopping_list_cost:.2f}", help="Cost of items to buy (excludes pantry staples)")
-            with col_cost3:
-                if meal_cost > 0:
-                    cost_per_serving = meal_cost / sum(st.session_state.recipe_servings.get(r, 2) for r in selected_recipes)
-                    st.metric("👤 Cost Per Serving", f"£{cost_per_serving:.2f}", help="Average cost per person")
-        
-        # Show per-recipe costs
-            if recipe_costs and any(v > 0 for v in recipe_costs.values()):
-                with st.expander("📊 Cost Per Recipe", expanded=False):
-                    for recipe in selected_recipes:
-                        cost = recipe_costs.get(recipe, 0)
-                        servings = st.session_state.recipe_servings.get(recipe, 2)
-                        cost_per_serving_recipe = cost / servings if servings > 0 else 0
-                    
-                        col_r1, col_r2, col_r3 = st.columns([3, 1, 1])
-                        with col_r1:
-                            st.write(f"**{recipe}**")
-                        with col_r2:
-                            st.write(f"£{cost:.2f}")
-                        with col_r3:
-                            st.caption(f"£{cost_per_serving_recipe:.2f}/serving")
-        
-            if not items_without_price.empty:
-                missing_list = [f"{row['ingredient']} ({row['unit']})" for _, row in items_without_price.iterrows()]
-                st.warning(f"⚠️ {len(missing_list)} items missing pricing: {', '.join(missing_list[:5])}{'...' if len(missing_list) > 5 else ''}")
-                st.info("💡 Add pricing in the 'Ingredient Pricing' tab for accurate cost estimates")
-        
+            total_shop = shop["item_cost"].sum()
+            total_meal = sum(_recipe_cost(rn, sel_df) for rn in selected)
+            total_servings = sum(
+                st.session_state["recipe_servings"].get(rn, 2) for rn in selected
+            )
+
+            k1, k2, k3 = st.columns(3)
+            if total_meal > 0:
+                k1.metric("🍽️ Total Meal Cost", f"£{total_meal:.2f}")
+            if total_shop > 0:
+                k2.metric("🛒 Shopping Cost", f"£{total_shop:.2f}")
+            if total_meal > 0 and total_servings > 0:
+                k3.metric("👤 Per Serving", f"£{total_meal / total_servings:.2f}")
+
+            with st.expander("📊 Cost Per Recipe"):
+                for rn in selected:
+                    rc = _recipe_cost(rn, sel_df)
+                    sv = st.session_state["recipe_servings"].get(rn, 2)
+                    a, b, c = st.columns([3, 1, 1])
+                    a.write(f"**{rn}**")
+                    b.write(f"£{rc:.2f}")
+                    c.caption(f"£{rc / max(sv, 1):.2f}/serving")
+
+            no_price = shop[shop["price_per_unit"] == 0]
+            if not no_price.empty:
+                items = [f"{r['ingredient']} ({r['unit']})" for _, r in no_price.iterrows()]
+                st.warning(
+                    f"⚠️ {len(items)} item(s) missing pricing: "
+                    + ", ".join(items[:5])
+                    + ("…" if len(items) > 5 else "")
+                )
+
             st.divider()
-        
-        # Format shopping list for display
-            shopping_list_display = shopping_list.copy()
-            shopping_list_display['price_per_unit'] = shopping_list_display['price_per_unit'].apply(lambda x: f"£{x:.2f}" if x > 0 else "-")
-            shopping_list_display['item_cost'] = shopping_list_display['item_cost'].apply(lambda x: f"£{x:.2f}" if x > 0 else "-")
-            shopping_list_display = shopping_list_display.rename(columns={
-                "price_per_unit": "Price/Unit",
-                "item_cost": "Total Cost"
-            })
-        
-            st.dataframe(shopping_list_display, hide_index=True, use_container_width=True)
+            st.subheader("🛒 Shopping List")
 
-            col1, col2 = st.columns(2)
-        
-            with col1:
-                csv = shopping_list.to_csv(index=False).encode("utf-8")
-                st.download_button(
-                    label="💾 Download Shopping List (CSV)",
-                    data=csv,
-                    file_name="shopping_list.csv",
-                    mime="text/csv"
-                )
-        
-            with col2:
-            # Export detailed weekly recipe list with ingredients
-                recipe_details_list = []
-                for recipe in selected_recipes:
-                    recipe_data = selected_data[selected_data["recipe_name"] == recipe]
-                    recipe_info = recipe_data.iloc[0]
-                    servings = st.session_state.recipe_servings.get(recipe, int(recipe_info.get('servings', 2)))
-                
-                # Add recipe header
-                    recipe_details_list.append({
-                        "recipe_name": recipe,
-                        "servings": servings,
-                        "cook_time": recipe_info.get('cook_time', ''),
-                        "source": recipe_info.get('source', ''),
-                        "source_url": recipe_info.get('source_url', ''),
-                        "ingredient": "--- RECIPE DETAILS ---",
-                        "quantity": "",
-                        "unit": "",
-                        "category": ""
-                    })
-                
-                # Add ingredients
-                    for _, ing_row in recipe_data.iterrows():
-                        recipe_details_list.append({
-                            "recipe_name": "",
-                            "servings": "",
-                            "cook_time": "",
-                            "source": "",
-                            "source_url": "",
-                            "ingredient": ing_row['ingredient'],
-                            "quantity": f"{ing_row['quantity']:.2f}" if pd.notna(ing_row['quantity']) else "",
-                            "unit": ing_row['unit'],
-                            "category": ing_row.get('category', '')
-                        })
-                
-                # Add separator
-                    recipe_details_list.append({
-                        "recipe_name": "",
-                        "servings": "",
-                        "cook_time": "",
-                        "source": "",
-                        "source_url": "",
-                        "ingredient": "",
-                        "quantity": "",
-                        "unit": "",
-                        "category": ""
-                    })
-            
-                recipe_list_df = pd.DataFrame(recipe_details_list)
-                recipe_csv = recipe_list_df.to_csv(index=False).encode("utf-8")
-                st.download_button(
-                    label="📋 Download Weekly Recipe List (CSV)",
-                    data=recipe_csv,
-                    file_name="weekly_recipes.csv",
-                    mime="text/csv"
-                )
-        
-        # Save to meal history
-            st.subheader("📅 Save to Meal History")
-            week_date = st.date_input("Week starting:", value=pd.Timestamp.now())
-            if st.button("💾 Save This Week's Meals to History"):
-                new_history = pd.DataFrame({
-                    "week_start": [week_date.strftime("%Y-%m-%d")] * len(selected_recipes),
-                    "recipe_name": selected_recipes
+            display_shop = shop.copy()
+            display_shop["price_per_unit"] = display_shop["price_per_unit"].apply(
+                lambda x: f"£{x:.2f}" if x > 0 else "—")
+            display_shop["item_cost"] = display_shop["item_cost"].apply(
+                lambda x: f"£{x:.2f}" if x > 0 else "—")
+            display_shop.columns = [
+                "Ingredient", "Unit", "Category", "Qty",
+                "Used In", "Price/Unit", "Total",
+            ]
+
+            st.dataframe(display_shop, hide_index=True, use_container_width=True)
+
+            dl1, dl2 = st.columns(2)
+            dl1.download_button(
+                "💾 Download Shopping List",
+                shop.to_csv(index=False).encode(),
+                "shopping_list.csv", "text/csv",
+            )
+
+            detail_rows = []
+            for rn in selected:
+                rd = sel_df[sel_df["recipe_name"] == rn]
+                info = rd.iloc[0]
+                detail_rows.append({
+                    "recipe_name": rn,
+                    "servings": st.session_state["recipe_servings"].get(rn, 2),
+                    "cook_time": info.get("cook_time", ""),
+                    "source": info.get("source", ""),
+                    "ingredient": "", "quantity": "", "unit": "", "category": "",
                 })
-                updated_history = pd.concat([meal_history, new_history], ignore_index=True)
-                save_history(updated_history)
-                st.rerun()
-        else:
-            st.info("👈 Choose some recipes to generate your shopping list.")
+                for _, ir in rd.iterrows():
+                    detail_rows.append({
+                        "recipe_name": "", "servings": "", "cook_time": "", "source": "",
+                        "ingredient": ir["ingredient"],
+                        "quantity": f"{ir['quantity']:.2f}" if pd.notna(ir["quantity"]) else "",
+                        "unit": ir["unit"], "category": ir.get("category", ""),
+                    })
+            dl2.download_button(
+                "📋 Download Weekly Recipes",
+                pd.DataFrame(detail_rows).to_csv(index=False).encode(),
+                "weekly_recipes.csv", "text/csv",
+            )
 
-# ============================================================
-# 📅 TAB 3: Calendar View
-# ============================================================
+            st.divider()
+            st.subheader("📅 Save to Meal History")
+            with st.form("save_history_form"):
+                week_date = st.date_input("Week starting:", value=pd.Timestamp.now())
+                if st.form_submit_button("💾 Save This Week's Meals"):
+                    new_h = pd.DataFrame({
+                        "week_start": [week_date.strftime("%Y-%m-%d")] * len(selected),
+                        "recipe_name": selected,
+                    })
+                    _save_history(
+                        pd.concat([meal_history, new_h], ignore_index=True)
+                    )
+                    st.success("Meal history saved!")
+        else:
+            st.info("Select recipes above to generate your shopping list.")
+
+# ════════════════════════════════════════════════════════════════════════════
+# 📅 Calendar View
+# ════════════════════════════════════════════════════════════════════════════
 with tabs[3]:
     st.header("📅 Weekly Meal Calendar")
-    
+
     if recipes.empty:
-        st.info("📝 No recipes available. Go to the **'✏️ Edit Recipes'** tab to add recipes first!")
+        st.info("Add recipes first in **✏️ Edit Recipes**.")
     else:
-        days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-        
-        st.write("Plan which recipe you'll cook on each day of the week:")
-        
+        days = [
+            "Monday", "Tuesday", "Wednesday", "Thursday",
+            "Friday", "Saturday", "Sunday",
+        ]
+        avail = ["—"] + _unique_recipes(recipes)
+
         for day in days:
-            col1, col2, col3 = st.columns([2, 3, 1])
-            
-            with col1:
-                st.write(f"**{day}**")
-            
-            with col2:
-                available_recipes = ["None"] + sorted(recipes["recipe_name"].unique().tolist())
-                current_selection = st.session_state.daily_plan.get(day, "None")
-                if current_selection not in available_recipes:
-                    current_selection = "None"
-            
-            selected = st.selectbox(
-                f"{day}",
-                available_recipes,
-                index=available_recipes.index(current_selection),
-                key=f"day_{day}",
-                label_visibility="collapsed"
+            c1, c2, c3 = st.columns([2, 3, 1])
+            c1.markdown(f"**{day}**")
+            current = st.session_state["daily_plan"].get(day)
+            idx = avail.index(current) if current in avail else 0
+            pick = c2.selectbox(
+                day, avail, index=idx, key=f"cal_{day}",
+                label_visibility="collapsed",
             )
-            st.session_state.daily_plan[day] = selected if selected != "None" else None
-        
-            with col3:
-                if st.session_state.daily_plan[day]:
-                    recipe_info = recipes[recipes["recipe_name"] == st.session_state.daily_plan[day]].iloc[0]
-                    if recipe_info.get('cook_time'):
-                        st.caption(f"⏱️ {recipe_info['cook_time']}")
-    
-        st.divider()
-    
-        # Quick actions
-        col_action1, col_action2 = st.columns(2)
-    
-        with col_action1:
-            if st.button("📋 Add All to Weekly Planner"):
-                planned_recipes = [meal for meal in st.session_state.daily_plan.values() if meal]
-                st.session_state.weekly_recipes = list(set(st.session_state.weekly_recipes + planned_recipes))
-                st.success(f"Added {len(planned_recipes)} recipes to weekly planner!")
-    
-        with col_action2:
-            if st.button("🗑️ Clear Calendar"):
-                st.session_state.daily_plan = {day: None for day in days}
-                st.rerun()
-    
-    # Summary
-        planned_days = sum(1 for meal in st.session_state.daily_plan.values() if meal)
-        if planned_days > 0:
-            st.success(f"✅ You have meals planned for {planned_days} days this week!")
-        else:
-            st.info("Start planning your week by selecting recipes for each day!")
+            st.session_state["daily_plan"][day] = pick if pick != "—" else None
+            if st.session_state["daily_plan"][day]:
+                rd = recipes[recipes["recipe_name"] == pick]
+                if not rd.empty:
+                    ct = rd.iloc[0]["cook_time"]
+                    if ct:
+                        c3.caption(f"⏱️ {ct}")
 
-# ============================================================
-# 🥫 TAB 4: Pantry Staples
-# ============================================================
+        st.divider()
+        a1, a2 = st.columns(2)
+        if a1.button("📋 Add All to Weekly Planner"):
+            planned = [v for v in st.session_state["daily_plan"].values() if v]
+            st.session_state["weekly_recipes"] = list(
+                set(st.session_state["weekly_recipes"] + planned))
+            st.success(f"Added {len(planned)} recipe(s) to planner!")
+        if a2.button("🗑️ Clear Calendar"):
+            st.session_state["daily_plan"] = {d: None for d in days}
+            st.toast("Calendar cleared")
+
+        n_planned = sum(1 for v in st.session_state["daily_plan"].values() if v)
+        if n_planned:
+            st.success(f"✅ Meals planned for {n_planned}/7 days")
+
+# ════════════════════════════════════════════════════════════════════════════
+# 🥫 Pantry Staples
+# ════════════════════════════════════════════════════════════════════════════
 with tabs[4]:
-    st.header("🥫 Pantry Staples Manager")
-    
-    st.write("Track ingredients you always have at home. These will be excluded from your shopping list!")
-    
-    # Add pantry staple
-    with st.form("add_pantry"):
-        new_staple = st.text_input("Add ingredient to pantry:")
+    st.header("🥫 Pantry Staples")
+    st.write("Items here are excluded from your shopping list.")
+
+    with st.form("add_pantry_form"):
+        new_staple = st.text_input("Add ingredient:")
         if st.form_submit_button("➕ Add to Pantry"):
-            if new_staple:
-                new_df = pd.DataFrame({"ingredient": [new_staple.strip()]})
-                updated_pantry = pd.concat([pantry_staples, new_df], ignore_index=True)
-                updated_pantry = updated_pantry.drop_duplicates()
-                save_pantry(updated_pantry)
-                st.rerun()
-    
-    st.divider()
-    
-    # Display and manage pantry
-    if not pantry_staples.empty:
-        st.subheader("Your Pantry Staples")
-        
-        # Show in columns
-        num_cols = 3
-        cols = st.columns(num_cols)
-        
-        for idx, staple in pantry_staples.iterrows():
-            col_idx = idx % num_cols
-            with cols[col_idx]:
-                col_item, col_del = st.columns([3, 1])
-                with col_item:
-                    st.write(f"• {staple['ingredient']}")
-                with col_del:
-                    if st.button("🗑️", key=f"del_pantry_{idx}"):
-                        updated_pantry = pantry_staples.drop(idx)
-                        save_pantry(updated_pantry)
-                        st.rerun()
-        
-        # Quick suggestions based on common items
+            if new_staple.strip():
+                updated = pd.concat(
+                    [pantry, pd.DataFrame({"ingredient": [new_staple.strip()]})],
+                    ignore_index=True,
+                ).drop_duplicates()
+                _save_pantry(updated)
+                st.success(f"Added {new_staple.strip()}")
+
+    if not pantry.empty:
+        st.subheader("Your Pantry")
+        pcols = st.columns(3)
+        for i, (idx, row) in enumerate(pantry.iterrows()):
+            with pcols[i % 3]:
+                ic, dc = st.columns([3, 1])
+                ic.write(f"• {row['ingredient']}")
+                if dc.button("🗑️", key=f"dp_{idx}"):
+                    _save_pantry(pantry.drop(idx).reset_index(drop=True))
+                    st.toast(f"Removed {row['ingredient']}")
+
         st.divider()
-        st.subheader("💡 Common Pantry Items")
-        common_items = ["Salt", "Pepper", "Olive oil", "Garlic", "Onion", "Rice", "Pasta", "Flour", "Sugar", "Butter"]
-        existing = pantry_staples['ingredient'].str.lower().tolist()
-        suggestions = [item for item in common_items if item.lower() not in existing]
-        
+        st.subheader("💡 Suggestions")
+        common = [
+            "Salt", "Pepper", "Olive oil", "Garlic", "Onion",
+            "Rice", "Pasta", "Flour", "Sugar", "Butter",
+        ]
+        existing_lower = set(pantry["ingredient"].str.lower())
+        suggestions = [c for c in common if c.lower() not in existing_lower]
         if suggestions:
-            cols = st.columns(5)
-            for idx, item in enumerate(suggestions[:5]):
-                with cols[idx]:
-                    if st.button(f"➕ {item}", key=f"add_common_{item}"):
-                        new_df = pd.DataFrame({"ingredient": [item]})
-                        updated_pantry = pd.concat([pantry_staples, new_df], ignore_index=True)
-                        save_pantry(updated_pantry)
-                        st.rerun()
+            sc = st.columns(min(5, len(suggestions)))
+            for j, item in enumerate(suggestions[:5]):
+                if sc[j].button(f"➕ {item}", key=f"sug_{item}"):
+                    _save_pantry(pd.concat(
+                        [pantry, pd.DataFrame({"ingredient": [item]})],
+                        ignore_index=True,
+                    ))
+                    st.toast(f"Added {item}")
     else:
-        st.info("No pantry staples yet. Add ingredients you always have at home!")
+        st.info("No pantry staples yet.")
 
-# ============================================================
-# 💰 TAB 5: Ingredient Pricing
-# ============================================================
+# ════════════════════════════════════════════════════════════════════════════
+# 💰 Ingredient Pricing
+# ════════════════════════════════════════════════════════════════════════════
 with tabs[5]:
-    st.header("💰 Ingredient Pricing Manager")
-    
-    st.write("Set the price per unit for ingredients to get accurate cost estimates for meals and shopping lists.")
-    
-    # Get all unique ingredients from recipes
-    all_ingredients = recipes[['ingredient', 'unit']].drop_duplicates()
-    
-    # Add new ingredient price
-    with st.expander("➕ Add/Update Ingredient Price"):
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            ingredient_name = st.text_input("Ingredient name:")
-        with col2:
-            ingredient_unit = st.text_input("Unit (e.g., g, ml, item):")
-        with col3:
-            price_per_unit = st.number_input("Price per unit (£):", min_value=0.0, step=0.01, format="%.2f")
-        
-        if st.button("💾 Save Price"):
-            if ingredient_name and ingredient_unit:
-                # Check if already exists
-                existing = ingredient_pricing[
-                    (ingredient_pricing['ingredient'].str.lower() == ingredient_name.lower()) & 
-                    (ingredient_pricing['unit'].str.lower() == ingredient_unit.lower())
-                ]
-                
-                if not existing.empty:
-                    # Update existing
-                    ingredient_pricing.loc[
-                        (ingredient_pricing['ingredient'].str.lower() == ingredient_name.lower()) & 
-                        (ingredient_pricing['unit'].str.lower() == ingredient_unit.lower()),
-                        'price_per_unit'
-                    ] = price_per_unit
+    st.header("💰 Ingredient Pricing")
+
+    with st.form("add_price_form"):
+        st.subheader("Add / Update Price")
+        pc1, pc2, pc3 = st.columns(3)
+        p_name = pc1.text_input("Ingredient:")
+        p_unit = pc2.text_input("Unit (g, ml, item…):")
+        p_price = pc3.number_input("£ per unit:", min_value=0.0, step=0.01, format="%.4f")
+        if st.form_submit_button("💾 Save Price"):
+            if p_name.strip() and p_unit.strip():
+                match_mask = (
+                    (pricing["ingredient"].str.lower() == p_name.strip().lower())
+                    & (pricing["unit"].str.lower() == p_unit.strip().lower())
+                )
+                updated = pricing.copy()
+                if match_mask.any():
+                    updated.loc[match_mask, "price_per_unit"] = p_price
                 else:
-                    # Add new
-                    new_price = pd.DataFrame({
-                        "ingredient": [ingredient_name],
-                        "unit": [ingredient_unit],
-                        "price_per_unit": [price_per_unit]
-                    })
-                    ingredient_pricing = pd.concat([ingredient_pricing, new_price], ignore_index=True)
-                
-                save_pricing(ingredient_pricing)
-                st.rerun()
+                    updated = pd.concat([updated, pd.DataFrame({
+                        "ingredient": [p_name.strip()],
+                        "unit": [p_unit.strip()],
+                        "price_per_unit": [p_price],
+                        "last_updated": [""],
+                    })], ignore_index=True)
+                _save_pricing(updated)
+                st.success("Price saved!")
             else:
-                st.warning("Please fill in ingredient name and unit.")
-    
+                st.warning("Fill in ingredient and unit.")
+
     st.divider()
-    
-    # Show ingredients without pricing
-    st.subheader("⚠️ Ingredients Missing Prices")
-    
-    if recipes.empty:
-        st.info("No recipes added yet. Add recipes first to see which ingredients need pricing.")
-    else:
-        # Merge to find ingredients without prices
-        ingredients_with_status = all_ingredients.copy()
-        ingredients_with_status['has_price'] = ingredients_with_status.apply(
-            lambda row: not ingredient_pricing[
-                (ingredient_pricing['ingredient'].str.lower() == row['ingredient'].lower()) & 
-                (ingredient_pricing['unit'].str.lower() == row['unit'].lower())
-            ].empty,
-            axis=1
-        )
-        
-        missing_prices = ingredients_with_status[~ingredients_with_status['has_price']]
-        
-        if not missing_prices.empty:
-            st.write(f"Found **{len(missing_prices)}** ingredients used in recipes without pricing:")
-            
-            # Show in editable format
-            for idx, row in missing_prices.iterrows():
-                col1, col2, col3, col4 = st.columns([3, 2, 2, 1])
-                with col1:
-                    st.write(f"**{row['ingredient']}**")
-                with col2:
-                    st.write(f"Unit: {row['unit']}")
-                with col3:
-                    price = st.number_input(
-                        "Price (£):",
-                        min_value=0.0,
-                        step=0.01,
-                        format="%.2f",
-                        key=f"price_missing_{idx}",
-                        label_visibility="collapsed"
+
+    if not recipes.empty:
+        all_ings = recipes[["ingredient", "unit"]].drop_duplicates()
+        all_ings["has_price"] = all_ings.apply(
+            lambda r: _lookup_price(r["ingredient"], r["unit"]) > 0, axis=1)
+        missing_p = all_ings[~all_ings["has_price"]]
+        if not missing_p.empty:
+            st.subheader(f"⚠️ {len(missing_p)} Ingredient(s) Missing Prices")
+            for _, mr in missing_p.iterrows():
+                with st.form(f"mp_{mr['ingredient']}_{mr['unit']}"):
+                    a, b, c, d = st.columns([3, 2, 2, 1])
+                    a.write(f"**{mr['ingredient']}**")
+                    b.write(mr["unit"])
+                    mp = c.number_input(
+                        "£", min_value=0.0, step=0.01, format="%.4f",
+                        key=f"mpv_{mr['ingredient']}_{mr['unit']}",
                     )
-                with col4:
-                    if st.button("💾", key=f"save_missing_{idx}"):
-                        new_price = pd.DataFrame({
-                            "ingredient": [row['ingredient']],
-                            "unit": [row['unit']],
-                            "price_per_unit": [price]
-                        })
-                        updated_pricing = pd.concat([ingredient_pricing, new_price], ignore_index=True)
-                        save_pricing(updated_pricing)
-                        st.rerun()
+                    if d.form_submit_button("💾"):
+                        up = pd.concat([pricing, pd.DataFrame({
+                            "ingredient": [mr["ingredient"]],
+                            "unit": [mr["unit"]],
+                            "price_per_unit": [mp],
+                            "last_updated": [""],
+                        })], ignore_index=True)
+                        _save_pricing(up)
+                        st.success(f"Saved {mr['ingredient']}")
         else:
-            st.success("✅ All ingredients used in recipes have pricing!")
-    
+            st.success("✅ All ingredients have pricing!")
+
     st.divider()
-    
-    # Show all ingredient prices
-    st.subheader("📋 All Ingredient Prices")
-    
-    if not ingredient_pricing.empty:
-        # Display as editable table
-        st.write("Click on cells to edit prices directly:")
-        
-        # Prepare display with formatted last_updated
-        display_pricing = ingredient_pricing.copy()
-        if 'last_updated' in display_pricing.columns:
-            display_pricing['last_updated'] = pd.to_datetime(display_pricing['last_updated']).dt.strftime('%Y-%m-%d %H:%M')
-        
-        edited_pricing = st.data_editor(
-            display_pricing.sort_values('ingredient'),
-            hide_index=True,
-            use_container_width=True,
+
+    st.subheader("📋 All Prices")
+    if not pricing.empty:
+        disp_p = pricing.copy().sort_values("ingredient")
+        if "last_updated" in disp_p.columns:
+            disp_p["last_updated"] = (
+                pd.to_datetime(disp_p["last_updated"], errors="coerce")
+                .dt.strftime("%Y-%m-%d %H:%M")
+                .fillna("")
+            )
+
+        edited_prices = st.data_editor(
+            disp_p, hide_index=True, use_container_width=True,
             column_config={
-                "ingredient": st.column_config.TextColumn("Ingredient", width="medium"),
-                "unit": st.column_config.TextColumn("Unit", width="small"),
+                "ingredient": st.column_config.TextColumn("Ingredient"),
+                "unit": st.column_config.TextColumn("Unit"),
                 "price_per_unit": st.column_config.NumberColumn(
-                    "Price per Unit (£)",
-                    format="£%.2f",
-                    width="small"
-                ),
-                "last_updated": st.column_config.TextColumn("Last Updated", width="medium")
+                    "£/unit", format="£%.4f"),
+                "last_updated": st.column_config.TextColumn("Updated"),
             },
-            disabled=["last_updated"]  # Don't allow editing the timestamp
+            disabled=["last_updated"],
         )
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("💾 Save All Changes"):
-                save_pricing(edited_pricing)
-                st.rerun()
-        
-        with col2:
-            # Export pricing
-            pricing_csv = ingredient_pricing.to_csv(index=False).encode("utf-8")
-            st.download_button(
-                label="📥 Download Pricing List (CSV)",
-                data=pricing_csv,
-                file_name="ingredient_pricing.csv",
-                mime="text/csv"
-            )
+        if st.button("💾 Save All Price Changes"):
+            _save_pricing(edited_prices)
+            st.success("All prices saved!")
+
+        st.download_button(
+            "📥 Download Pricing CSV",
+            pricing.to_csv(index=False).encode(),
+            "ingredient_pricing.csv", "text/csv",
+        )
     else:
-        st.info("No ingredient prices set yet. Add prices above to get started!")
-    
+        st.info("No prices yet — add some above.")
+
     st.divider()
-    
-    # Price History Section
+
     st.subheader("📊 Price Change History")
-    
-    price_history = load_price_history()
-    
-    if not price_history.empty:
-        # Search/filter for price history
-        history_search = st.text_input("🔍 Search price history (ingredient name):")
-        
-        history_display = price_history.copy()
-        history_display['changed_at'] = pd.to_datetime(history_display['changed_at']).dt.strftime('%Y-%m-%d %H:%M')
-        history_display = history_display.sort_values('changed_at', ascending=False)
-        
-        # Apply search filter
-        if history_search:
-            history_display = history_display[
-                history_display['ingredient'].str.contains(history_search, case=False, na=False)
-            ]
-        
-        if history_display.empty:
-            st.info("No matching price history found.")
-        else:
-            # Calculate price change percentage
-            history_display['change'] = history_display.apply(
-                lambda row: f"{((row['new_price'] - row['old_price']) / row['old_price'] * 100):.1f}%" 
-                if row['old_price'] > 0 else "New",
-                axis=1
-            )
-            
-            # Format prices
-            history_display['old_price'] = history_display['old_price'].apply(lambda x: f"£{x:.2f}")
-            history_display['new_price'] = history_display['new_price'].apply(lambda x: f"£{x:.2f}")
-            
-            # Rename columns for display
-            history_display = history_display.rename(columns={
-                "ingredient": "Ingredient",
-                "unit": "Unit",
-                "old_price": "Old Price",
-                "new_price": "New Price",
-                "change": "Change",
-                "changed_at": "Changed At"
-            })
-            
-            st.dataframe(
-                history_display[["Ingredient", "Unit", "Old Price", "New Price", "Change", "Changed At"]],
-                hide_index=True,
-                use_container_width=True
-            )
-            
-            st.caption(f"Showing {len(history_display)} price change(s)")
-    else:
-        st.info("No price changes recorded yet. Price changes will appear here when you update ingredient prices.")
-
-# ============================================================
-# ✏️ TAB 6: Add / Edit Recipes
-# ============================================================
-with tabs[6]:
-    st.header("Add or Modify Recipes")
-
-    with st.expander("➕ Add New Recipe", expanded=True):
-        st.write("Fill in the recipe details below. All fields marked with * are required.")
-        
-        # Recipe basic info
-        col_name, col_servings = st.columns([3, 1])
-        with col_name:
-            new_recipe_name = st.text_input("Recipe name *", placeholder="e.g., Spaghetti Carbonara")
-        with col_servings:
-            new_servings = st.number_input("Servings *", min_value=1, max_value=20, value=2)
-        
-        # Metadata in columns
-        col1, col2 = st.columns(2)
-        with col1:
-            new_cook_time = st.text_input("Cook time", placeholder="e.g., 30 mins", help="Approximate cooking time")
-            new_rating = st.selectbox("Rating:", [""] + [str(i) for i in range(1, 6)], help="Rate this recipe 1-5 stars")
-            new_prep_friendly = st.checkbox("Meal prep friendly?", help="Can this be batch cooked or prepared ahead?")
-        with col2:
-            new_source = st.text_input("Source", placeholder="e.g., BBC Good Food", help="Where did you find this recipe?")
-            new_source_url = st.text_input("Source URL", placeholder="https://...", help="Link to the original recipe")
-        
-        new_tags = st.text_input("Tags (comma-separated)", placeholder="e.g., Italian, Pasta, Quick", help="Add tags to organize recipes")
-        new_notes = st.text_area("Notes", placeholder="Any special instructions or modifications...", help="Optional notes about the recipe")
-        
-        st.divider()
-        
-        # Ingredient input options
-        st.subheader("📝 Add Ingredients")
-        
-        # Get existing ingredients and units for autocomplete
-        existing_ingredients = sorted(recipes['ingredient'].unique().tolist()) if not recipes.empty else []
-        existing_units = sorted(recipes['unit'].unique().tolist()) if not recipes.empty else ['g', 'ml', 'tsp', 'tbsp', 'cup', 'item']
-        existing_categories = sorted([str(cat) for cat in recipes['category'].unique().tolist() if cat and str(cat) != 'nan']) if not recipes.empty else ['Protein', 'Vegetables', 'Carbs', 'Dairy', 'Spices', 'Other']
-        
-        input_method = st.radio(
-            "Choose input method:",
-            ["📊 Table Format (Recommended)", "📝 Text Format"],
-            help="Table format is easier and validates as you type"
+    ph = _load_price_history()
+    if not ph.empty:
+        hs = st.text_input("🔍 Search history:", key="ph_search")
+        disp_h = ph.copy()
+        disp_h["changed_at"] = (
+            pd.to_datetime(disp_h["changed_at"], errors="coerce")
+            .dt.strftime("%Y-%m-%d %H:%M")
+            .fillna("")
         )
-        
-        if input_method == "📊 Table Format (Recommended)":
-            st.write("Add ingredients one by one:")
-            
-            # Initialize session state for ingredient list
-            if "new_recipe_ingredients" not in st.session_state:
-                st.session_state.new_recipe_ingredients = []
-            
-            # Add ingredient form
-            with st.form("add_ingredient_form", clear_on_submit=True):
-                col_ing, col_qty, col_unit, col_cat = st.columns([3, 1, 1, 2])
-                with col_ing:
-                    ing_name = st.selectbox("Ingredient", [""] + existing_ingredients, key="ing_input")
-                    if not ing_name:
-                        ing_name = st.text_input("Or type new ingredient", key="ing_text", label_visibility="collapsed")
-                with col_qty:
-                    ing_qty = st.number_input("Quantity", min_value=0.0, step=0.1, format="%.1f", key="qty_input")
-                with col_unit:
-                    ing_unit = st.selectbox("Unit", existing_units, key="unit_input")
-                with col_cat:
-                    ing_cat = st.selectbox("Category (optional)", [""] + existing_categories + ["+ Add new category"], key="cat_input")
-                    if ing_cat == "+ Add new category":
-                        ing_cat = st.text_input("New category name", key="cat_new", label_visibility="collapsed")
-                
-                if st.form_submit_button("➕ Add Ingredient"):
-                    if ing_name and ing_qty > 0:
-                        st.session_state.new_recipe_ingredients.append({
-                            "ingredient": ing_name,
-                            "quantity": ing_qty,
-                            "unit": ing_unit,
-                            "category": ing_cat if ing_cat else ""
-                        })
-                        st.success(f"Added {ing_name}")
-                        st.rerun()
-                    else:
-                        st.error("Please enter ingredient name and quantity")
-            
-            # Show current ingredients
-            if st.session_state.new_recipe_ingredients:
-                st.write(f"**Current ingredients ({len(st.session_state.new_recipe_ingredients)}):**")
-                for idx, ing in enumerate(st.session_state.new_recipe_ingredients):
-                    col1, col2 = st.columns([5, 1])
-                    with col1:
-                        st.write(f"• {ing['ingredient']}: {ing['quantity']} {ing['unit']}" + 
-                                (f" ({ing['category']})" if ing['category'] else ""))
-                    with col2:
-                        if st.button("🗑️", key=f"del_ing_{idx}"):
-                            st.session_state.new_recipe_ingredients.pop(idx)
-                            st.rerun()
-            else:
-                st.info("👆 Add ingredients using the form above")
-        
-        else:  # Text format
-            st.write("Enter one ingredient per line in this format:")
-            st.code("ingredient_name, quantity, unit, category (optional)")
-            st.caption("Examples:")
-            st.caption("• Chicken breast, 300, g, Protein")
-            st.caption("• Olive oil, 2, tbsp")
-            st.caption("• Onion, 1, item, Vegetables")
-            
-            new_ingredients = st.text_area(
-                "Ingredients *",
-                placeholder="Chicken breast, 300, g, Protein\nOnion, 1, item, Vegetables",
-                height=150,
-                help="One ingredient per line: name, quantity, unit, category"
+        disp_h = disp_h.sort_values("changed_at", ascending=False)
+        if hs:
+            disp_h = disp_h[
+                disp_h["ingredient"].str.contains(hs, case=False, na=False)
+            ]
+
+        if disp_h.empty:
+            st.info("No matching history.")
+        else:
+            disp_h["change"] = disp_h.apply(
+                lambda r: (
+                    f"{((r['new_price'] - r['old_price']) / r['old_price'] * 100):.1f}%"
+                    if r["old_price"] > 0 else "New"
+                ),
+                axis=1,
             )
-        
-        st.divider()
-        
-        # Save button
-        col_save, col_clear = st.columns([1, 1])
-        with col_save:
-            if st.button("💾 Save Recipe", type="primary", use_container_width=True):
-                # Validate
-                if not new_recipe_name:
-                    st.error("❌ Please enter a recipe name")
-                elif input_method == "📊 Table Format (Recommended)" and not st.session_state.new_recipe_ingredients:
-                    st.error("❌ Please add at least one ingredient")
-                elif input_method == "📝 Text Format" and not new_ingredients:
-                    st.error("❌ Please enter ingredients")
+            disp_h["old_price"] = disp_h["old_price"].apply(lambda x: f"£{x:.4f}")
+            disp_h["new_price"] = disp_h["new_price"].apply(lambda x: f"£{x:.4f}")
+            disp_h.columns = ["Ingredient", "Unit", "Old", "New", "Changed At", "Δ"]
+            st.dataframe(
+                disp_h[["Ingredient", "Unit", "Old", "New", "Δ", "Changed At"]],
+                hide_index=True, use_container_width=True,
+            )
+            st.caption(f"{len(disp_h)} change(s)")
+    else:
+        st.info("No price changes recorded yet.")
+
+# ════════════════════════════════════════════════════════════════════════════
+# ✏️ Edit Recipes
+# ════════════════════════════════════════════════════════════════════════════
+with tabs[6]:
+    st.header("Add or Edit Recipes")
+
+    with st.expander("➕ Add New Recipe", expanded=not bool(_unique_recipes(recipes))):
+        with st.form("new_recipe_form"):
+            nc1, nc2 = st.columns([3, 1])
+            nr_name = nc1.text_input(
+                "Recipe name *", placeholder="e.g. Spaghetti Carbonara")
+            nr_servings = nc2.number_input("Servings *", 1, 20, 2)
+
+            mc1, mc2 = st.columns(2)
+            with mc1:
+                nr_cook = st.text_input("Cook time", placeholder="e.g. 30 mins")
+                nr_rating = st.selectbox(
+                    "Rating", [""] + [str(i) for i in range(1, 6)])
+                nr_prep = st.checkbox("Meal prep friendly?")
+            with mc2:
+                nr_source = st.text_input(
+                    "Source", placeholder="e.g. BBC Good Food")
+                nr_url = st.text_input("Source URL", placeholder="https://…")
+            nr_tags = st.text_input(
+                "Tags (comma-separated)", placeholder="Italian, Pasta, Quick")
+            nr_notes = st.text_area("Notes", placeholder="Special instructions…")
+
+            st.divider()
+            st.markdown(
+                "**Ingredients** — one per line: "
+                "`name, quantity, unit, category` (category optional)"
+            )
+            nr_ings = st.text_area(
+                "Ingredients *",
+                placeholder=(
+                    "Chicken breast, 300, g, Protein\n"
+                    "Onion, 1, item, Vegetables"
+                ),
+                height=200,
+            )
+
+            if st.form_submit_button("💾 Save Recipe", type="primary"):
+                if not nr_name.strip():
+                    st.error("Please enter a recipe name.")
+                elif not nr_ings.strip():
+                    st.error("Please enter at least one ingredient.")
                 else:
-                    # Process ingredients based on input method
-                    new_rows = []
-                    recipe_id = str(uuid.uuid4())
-                    errors = []
-                    
-                    if input_method == "📊 Table Format (Recommended)":
-                        for ing_data in st.session_state.new_recipe_ingredients:
-                            new_rows.append({
-                                "recipe_id": recipe_id,
-                                "recipe_name": new_recipe_name,
-                                "ingredient": ing_data['ingredient'],
-                                "quantity": float(ing_data['quantity']),
-                                "unit": ing_data['unit'],
-                                "category": ing_data['category'],
-                                "tags": new_tags,
-                                "cook_time": new_cook_time,
-                                "rating": new_rating if new_rating else '',
-                                "source": new_source,
-                                "source_url": new_source_url,
-                                "servings": new_servings,
-                                "notes": new_notes,
-                                "estimated_cost": 0.0,
-                                "prep_friendly": new_prep_friendly
-                            })
-                    else:  # Text format
-                        for line in new_ingredients.strip().split("\n"):
-                            if not line.strip():
+                    rid = str(uuid.uuid4())
+                    rows, errors = [], []
+                    for line in nr_ings.strip().splitlines():
+                        line = line.strip()
+                        if not line:
+                            continue
+                        parts = [p.strip() for p in line.split(",")]
+                        try:
+                            if len(parts) == 4:
+                                ing, qty, unit, cat = parts
+                            elif len(parts) == 3:
+                                ing, qty, unit = parts
+                                cat = ""
+                            else:
+                                errors.append(f"Bad format: {line}")
                                 continue
-                            parts = [x.strip() for x in line.split(",")]
-                            try:
-                                if len(parts) == 4:
-                                    ing, qty, unit, cat = parts
-                                elif len(parts) == 3:
-                                    ing, qty, unit = parts
-                                    cat = ""
-                                else:
-                                    errors.append(f"❌ Invalid format: {line}")
-                                    continue
-                                
-                                new_rows.append({
-                                    "recipe_id": recipe_id,
-                                    "recipe_name": new_recipe_name,
-                                    "ingredient": ing,
-                                    "quantity": float(qty),
-                                    "unit": unit,
-                                    "category": cat,
-                                    "tags": new_tags,
-                                    "cook_time": new_cook_time,
-                                    "rating": new_rating if new_rating else '',
-                                    "source": new_source,
-                                    "source_url": new_source_url,
-                                    "servings": new_servings,
-                                    "notes": new_notes,
-                                    "estimated_cost": 0.0,
-                                    "prep_friendly": new_prep_friendly
-                                })
-                            except ValueError as e:
-                                errors.append(f"❌ Error parsing '{line}': {e}")
-                    
-                    # Show errors if any
-                    if errors:
-                        for error in errors:
-                            st.error(error)
-                    
-                    # Save if we have valid rows
-                    if new_rows:
-                        new_df = pd.DataFrame(new_rows)
-                        updated = pd.concat([recipes, new_df], ignore_index=True)
-                        save_data(updated)
-                        # Clear the ingredient list for table format
-                        if "new_recipe_ingredients" in st.session_state:
-                            st.session_state.new_recipe_ingredients = []
-                        st.success(f"✅ Recipe '{new_recipe_name}' added successfully with {len(new_rows)} ingredients!")
-                        st.rerun()
-                    elif not errors:
-                        st.error("❌ No valid ingredients to save")
-        
-        with col_clear:
-            if st.button("🗑️ Clear Form", use_container_width=True):
-                if "new_recipe_ingredients" in st.session_state:
-                    st.session_state.new_recipe_ingredients = []
-                st.rerun()
-    
-    # Recipe-level editor for metadata
+                            rows.append({
+                                "recipe_id": rid,
+                                "recipe_name": nr_name.strip(),
+                                "ingredient": ing,
+                                "quantity": float(qty),
+                                "unit": unit,
+                                "category": cat,
+                                "tags": nr_tags,
+                                "cook_time": nr_cook,
+                                "rating": nr_rating,
+                                "source": nr_source,
+                                "source_url": nr_url,
+                                "servings": nr_servings,
+                                "notes": nr_notes,
+                                "estimated_cost": 0.0,
+                                "prep_friendly": nr_prep,
+                            })
+                        except ValueError as e:
+                            errors.append(f"Parse error on '{line}': {e}")
+                    for err in errors:
+                        st.error(err)
+                    if rows:
+                        _save_recipes(pd.concat(
+                            [recipes, pd.DataFrame(rows)], ignore_index=True))
+                        st.success(
+                            f"✅ **{nr_name}** saved with {len(rows)} ingredient(s)!"
+                        )
+
     st.subheader("✏️ Edit Recipe Metadata")
-    recipe_to_edit = st.selectbox("Select a recipe to edit:", [""] + sorted(recipes["recipe_name"].unique()))
-    
-    if recipe_to_edit:
-        recipe_data = recipes[recipes["recipe_name"] == recipe_to_edit].iloc[0]
-        
-        with st.form(f"edit_recipe_{recipe_to_edit}"):
-            st.write(f"**Editing: {recipe_to_edit}**")
-            
-            new_name = st.text_input("Recipe Name:", value=recipe_to_edit)
-            
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                new_cook = st.text_input("Cook Time:", value=recipe_data.get('cook_time', ''))
-                new_servings = st.number_input("Servings:", min_value=1, max_value=20, value=int(recipe_data.get('servings', 2)))
-            with col2:
-                # Fix rating index calculation
-                rating_val = recipe_data.get('rating', '')
-                if pd.isna(rating_val) or rating_val == '' or str(rating_val).strip() == '':
-                    rating_idx = 0
-                else:
-                    try:
-                        rating_idx = int(float(rating_val))
-                    except (ValueError, TypeError):
-                        rating_idx = 0
-                
-                new_rating_edit = st.selectbox("Rating:", [""] + [str(i) for i in range(1, 6)], index=rating_idx)
-                new_src = st.text_input("Source:", value=recipe_data.get('source', ''))
-            with col3:
-                new_tags_edit = st.text_input("Tags:", value=recipe_data.get('tags', ''))
-                new_src_url = st.text_input("Source URL:", value=recipe_data.get('source_url', ''))
-            
-            new_notes = st.text_area("Notes:", value=recipe_data.get('notes', ''))
-            
-            col_submit, col_delete, col_duplicate = st.columns(3)
-            
-            with col_submit:
-                if st.form_submit_button("💾 Save Changes", type="primary"):
-                    # Update all rows for this recipe
-                    recipes.loc[recipes["recipe_name"] == recipe_to_edit, "recipe_name"] = new_name
-                    recipes.loc[recipes["recipe_name"] == new_name, "cook_time"] = new_cook
-                    recipes.loc[recipes["recipe_name"] == new_name, "rating"] = new_rating_edit if new_rating_edit else ''
-                    recipes.loc[recipes["recipe_name"] == new_name, "source"] = new_src
-                    recipes.loc[recipes["recipe_name"] == new_name, "source_url"] = new_src_url
-                    recipes.loc[recipes["recipe_name"] == new_name, "tags"] = new_tags_edit
-                    recipes.loc[recipes["recipe_name"] == new_name, "servings"] = new_servings
-                    recipes.loc[recipes["recipe_name"] == new_name, "notes"] = new_notes
-                    save_data(recipes)
-                    st.rerun()
-            
-            with col_delete:
-                if st.form_submit_button("🗑️ Delete Recipe", type="secondary"):
-                    updated = recipes[recipes["recipe_name"] != recipe_to_edit]
-                    save_data(updated)
-                    st.rerun()
-            
-            with col_duplicate:
-                if st.form_submit_button("📋 Duplicate Recipe"):
-                    recipe_rows = recipes[recipes["recipe_name"] == recipe_to_edit].copy()
-                    new_recipe_id = str(uuid.uuid4())
-                    recipe_rows["recipe_id"] = new_recipe_id
-                    recipe_rows["recipe_name"] = f"{recipe_to_edit} (Copy)"
-                    updated = pd.concat([recipes, recipe_rows], ignore_index=True)
-                    save_data(updated)
-                    st.rerun()
+    names = _unique_recipes(recipes)
+    pick_edit = st.selectbox("Select recipe:", [""] + names, key="edit_pick")
+    if pick_edit:
+        rd = recipes[recipes["recipe_name"] == pick_edit].iloc[0]
+        with st.form(f"edit_meta_{pick_edit}"):
+            en = st.text_input("Name", value=pick_edit)
+            e1, e2, e3 = st.columns(3)
+            with e1:
+                ec = st.text_input("Cook Time", value=rd["cook_time"])
+                es = st.number_input(
+                    "Servings", 1, 20,
+                    int(rd["servings"]) if pd.notna(rd["servings"]) else 2,
+                )
+            with e2:
+                try:
+                    ri = int(float(rd["rating"])) if rd["rating"].strip() else 0
+                except (ValueError, TypeError):
+                    ri = 0
+                er = st.selectbox(
+                    "Rating", [""] + [str(i) for i in range(1, 6)], index=ri)
+                esrc = st.text_input("Source", value=rd["source"])
+            with e3:
+                et = st.text_input("Tags", value=rd["tags"])
+                eu = st.text_input("Source URL", value=rd["source_url"])
+            enotes = st.text_area("Notes", value=rd["notes"])
+
+            sc_btn, dc_btn, dupc_btn = st.columns(3)
+            save_btn = sc_btn.form_submit_button("💾 Save", type="primary")
+            del_btn = dc_btn.form_submit_button("🗑️ Delete")
+            dup_btn = dupc_btn.form_submit_button("📋 Duplicate")
+
+            if save_btn:
+                updated = recipes.copy()
+                updated.loc[updated["recipe_name"] == pick_edit, "recipe_name"] = en
+                for col, val in [
+                    ("cook_time", ec), ("rating", er), ("source", esrc),
+                    ("source_url", eu), ("tags", et), ("servings", es),
+                    ("notes", enotes),
+                ]:
+                    updated.loc[updated["recipe_name"] == en, col] = val
+                _save_recipes(updated)
+                st.success("Saved!")
+            elif del_btn:
+                _save_recipes(recipes[recipes["recipe_name"] != pick_edit])
+                st.success(f"Deleted {pick_edit}")
+            elif dup_btn:
+                dupe = recipes[recipes["recipe_name"] == pick_edit].copy()
+                dupe["recipe_id"] = str(uuid.uuid4())
+                dupe["recipe_name"] = f"{pick_edit} (Copy)"
+                _save_recipes(pd.concat([recipes, dupe], ignore_index=True))
+                st.success(f"Duplicated as '{pick_edit} (Copy)'")
 
     st.subheader("🧩 Edit Individual Ingredients")
-    
     if recipes.empty:
-        st.info("No recipes available to edit. Add a recipe above first!")
+        st.info("No recipes yet.")
     else:
-        st.write("Use the editor below to modify individual ingredient quantities, units, and categories:")
-        
-        # Filter by recipe
-        recipe_filter = st.selectbox(
-            "🔍 Filter by recipe (optional):",
-            options=["All recipes"] + sorted(recipes['recipe_name'].dropna().unique().tolist()),
-            key="recipe_filter_ingredients"
+        filt_name = st.selectbox(
+            "Filter by recipe:",
+            ["All recipes"] + names,
+            key="ing_filter",
         )
-        
-        # Apply filter if selected
-        if recipe_filter == "All recipes":
-            editable = st.data_editor(recipes, num_rows="dynamic", use_container_width=True)
-            st.caption(f"Showing all {len(recipes)} ingredients from all recipes")
+        if filt_name == "All recipes":
+            to_edit = recipes
         else:
-            filtered_recipes = recipes[recipes['recipe_name'] == recipe_filter]
-            editable = st.data_editor(filtered_recipes, num_rows="dynamic", use_container_width=True)
-            st.caption(f"Showing {len(filtered_recipes)} ingredients for **{recipe_filter}**")
+            to_edit = recipes[recipes["recipe_name"] == filt_name]
+
+        edited_ings = st.data_editor(
+            to_edit, num_rows="dynamic", use_container_width=True,
+            key="ing_editor",
+        )
+        st.caption(f"Showing {len(to_edit)} row(s)")
 
         if st.button("💾 Save Ingredient Changes"):
-            if recipe_filter != "All recipes":
-                recipes_updated = recipes.copy()
-                for idx in editable.index:
-                    recipes_updated.loc[idx] = editable.loc[idx]
-                save_data(recipes_updated)
+            if filt_name == "All recipes":
+                _save_recipes(edited_ings)
             else:
-                save_data(editable)
-            st.rerun()
+                full = recipes.copy()
+                full = full[full["recipe_name"] != filt_name]
+                full = pd.concat([full, edited_ings], ignore_index=True)
+                _save_recipes(full)
+            st.success("Ingredient changes saved!")
 
-# ============================================================
-# 📚 TAB 7: Meal History
-# ============================================================
+# ════════════════════════════════════════════════════════════════════════════
+# 📚 Meal History
+# ════════════════════════════════════════════════════════════════════════════
 with tabs[7]:
     st.header("📚 Meal History")
-    
-    if not meal_history.empty:
-        # Search/filter
-        search_history = st.text_input("🔍 Search history (recipe name or date):")
-        
-        st.subheader("Past Meals")
-        
-        # Group by week
-        history_display = meal_history.copy()
-        history_display['week_start'] = pd.to_datetime(history_display['week_start'])
-        history_display = history_display.sort_values('week_start', ascending=False)
-        
-        # Apply search filter
-        if search_history:
-            history_display = history_display[
-                history_display['recipe_name'].str.contains(search_history, case=False, na=False) |
-                history_display['week_start'].astype(str).str.contains(search_history, case=False, na=False)
-            ]
-        
-        if history_display.empty:
-            st.info("No matching history found.")
-        else:
-            # Display by week
-            for week_start in history_display['week_start'].unique():
-                week_recipes = history_display[history_display['week_start'] == week_start]
-                week_str = pd.to_datetime(week_start).strftime('%B %d, %Y')
-                
-                with st.expander(f"📅 Week of {week_str} ({len(week_recipes)} recipes)"):
-                    for idx, row in week_recipes.iterrows():
-                        col1, col2 = st.columns([4, 1])
-                        with col1:
-                            st.write(f"• {row['recipe_name']}")
-                        with col2:
-                            if st.button("🗑️", key=f"delete_history_{idx}"):
-                                updated_history = meal_history.drop(idx)
-                                save_history(updated_history)
-                                st.rerun()
-        
-        # Statistics
-        st.subheader("📊 Statistics")
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Total Weeks Tracked", history_display['week_start'].nunique())
-        with col2:
-            st.metric("Total Meals Recorded", len(history_display))
-        with col3:
-            st.metric("Unique Recipes", history_display['recipe_name'].nunique())
-        
-        # Most cooked recipes
-        if len(history_display) > 0:
-            st.subheader("⭐ Most Cooked Recipes")
-            top_recipes = history_display['recipe_name'].value_counts().head(5)
-            for recipe, count in top_recipes.items():
-                st.write(f"**{recipe}**: {count} times")
-        
-        # Export history
-        st.subheader("Export History")
-        history_csv = meal_history.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            label="💾 Download Full Meal History (CSV)",
-            data=history_csv,
-            file_name="meal_history.csv",
-            mime="text/csv"
+
+    if meal_history.empty:
+        st.info(
+            "No history yet — save a weekly plan from the planner!"
         )
-        
-        # Clear history
-        if st.button("🗑️ Clear All History", type="secondary"):
-            if st.button("⚠️ Confirm Clear History"):
-                save_history(pd.DataFrame(columns=["week_start", "recipe_name"]))
-                st.rerun()
     else:
-        st.info("No meal history yet. Save your weekly meals from the Weekly Planner tab to start tracking!")
+        search_h = st.text_input("🔍 Search history:", key="hist_search")
+        disp_hist = meal_history.copy()
+        disp_hist["week_start"] = pd.to_datetime(
+            disp_hist["week_start"], errors="coerce")
+        disp_hist = disp_hist.sort_values("week_start", ascending=False)
+        if search_h:
+            disp_hist = disp_hist[
+                disp_hist["recipe_name"].str.contains(
+                    search_h, case=False, na=False)
+                | disp_hist["week_start"].astype(str).str.contains(
+                    search_h, case=False, na=False)
+            ]
+
+        if disp_hist.empty:
+            st.info("No matching history.")
+        else:
+            for ws in disp_hist["week_start"].unique():
+                wk = disp_hist[disp_hist["week_start"] == ws]
+                label = pd.to_datetime(ws).strftime("%B %d, %Y")
+                with st.expander(
+                    f"📅 Week of {label} ({len(wk)} recipes)"
+                ):
+                    for idx, row in wk.iterrows():
+                        c1, c2 = st.columns([4, 1])
+                        c1.write(f"• {row['recipe_name']}")
+                        if c2.button("🗑️", key=f"dh_{idx}"):
+                            _save_history(
+                                meal_history.drop(idx).reset_index(drop=True))
+                            st.toast("Entry removed")
+
+        st.divider()
+        st.subheader("📊 Statistics")
+        s1, s2, s3 = st.columns(3)
+        s1.metric("Weeks Tracked", disp_hist["week_start"].nunique())
+        s2.metric("Total Meals", len(disp_hist))
+        s3.metric("Unique Recipes", disp_hist["recipe_name"].nunique())
+
+        if len(disp_hist) > 0:
+            st.subheader("⭐ Most Cooked")
+            for name, count in (
+                disp_hist["recipe_name"].value_counts().head(5).items()
+            ):
+                st.write(f"**{name}**: {count}×")
+
+        st.download_button(
+            "💾 Download History CSV",
+            meal_history.to_csv(index=False).encode(),
+            "meal_history.csv", "text/csv",
+        )
+
+        with st.form("clear_history_form"):
+            st.warning("This will permanently delete all meal history.")
+            if st.form_submit_button("🗑️ Clear All History"):
+                _save_history(
+                    pd.DataFrame(columns=["week_start", "recipe_name"]))
+                st.success("History cleared.")
