@@ -31,6 +31,9 @@ def load_data():
         # Ensure servings has a default
         df['servings'] = df['servings'].fillna(2)
         df['estimated_cost'] = pd.to_numeric(df['estimated_cost'], errors='coerce').fillna(0.0)
+        # Ensure cook_time is string to prevent .str accessor errors
+        if 'cook_time' in df.columns:
+            df['cook_time'] = df['cook_time'].fillna('').astype(str)
     else:
         df = pd.DataFrame(columns=["recipe_id", "recipe_name", "ingredient", "quantity", "unit", "category", "tags", "cook_time", "rating", "source", "source_url", "servings", "notes", "estimated_cost", "prep_friendly"])
     return df
@@ -1046,7 +1049,7 @@ with tabs[6]:
         # Get existing ingredients and units for autocomplete
         existing_ingredients = sorted(recipes['ingredient'].unique().tolist()) if not recipes.empty else []
         existing_units = sorted(recipes['unit'].unique().tolist()) if not recipes.empty else ['g', 'ml', 'tsp', 'tbsp', 'cup', 'item']
-        existing_categories = sorted([cat for cat in recipes['category'].unique().tolist() if cat]) if not recipes.empty else ['Protein', 'Vegetables', 'Carbs', 'Dairy', 'Spices', 'Other']
+        existing_categories = sorted([str(cat) for cat in recipes['category'].unique().tolist() if cat and str(cat) != 'nan']) if not recipes.empty else ['Protein', 'Vegetables', 'Carbs', 'Dairy', 'Spices', 'Other']
         
         input_method = st.radio(
             "Choose input method:",
