@@ -498,10 +498,15 @@ with tabs[2]:
             r for r in st.session_state["weekly_recipes"] if r in all_names
         ]
 
+        # Sync the widget key so external additions (Dashboard / Browse /
+        # Calendar buttons) are reflected when the multiselect renders.
+        st.session_state["planner_select"] = list(
+            st.session_state["weekly_recipes"]
+        )
+
         selected = st.multiselect(
             "Select recipes for this week:",
             options=all_names,
-            default=st.session_state["weekly_recipes"],
             key="planner_select",
         )
         st.session_state["weekly_recipes"] = selected
