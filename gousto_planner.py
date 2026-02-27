@@ -1332,12 +1332,10 @@ with tabs[6]:
             filtered_recipes = recipes[recipes['recipe_name'] == recipe_filter]
             editable = st.data_editor(filtered_recipes, num_rows="dynamic", use_container_width=True)
             st.caption(f"Showing {len(filtered_recipes)} ingredients for **{recipe_filter}**")
-        
-            if st.button("💾 Save Ingredient Changes"):
-            # If filtered, merge changes back into the full dataset
-                if recipe_filter != "All recipes":
-                # Update only the edited rows in the main recipes dataframe
-                    recipes_updated = recipes.copy()
+
+        if st.button("💾 Save Ingredient Changes"):
+            if recipe_filter != "All recipes":
+                recipes_updated = recipes.copy()
                 for idx in editable.index:
                     recipes_updated.loc[idx] = editable.loc[idx]
                 save_data(recipes_updated)
